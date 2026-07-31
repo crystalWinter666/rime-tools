@@ -1,333 +1,269 @@
-# RIME 雾凇 服务器工具
+# RIME 雾凇 服务器工具 (rime-tools)
 
-RIME 雾凇服务器定制基础插件。
+一个面向 Fabric 服务器的模块化传送与玩家称号工具集。为服务器提供一套开箱即用的 **传送**（个人/公共传送点、TPA、返回、随机传送）与
+**玩家称号**（头衔选择、排行授勋、聊天展示）功能，并深度集成 Carpet 假人、LuckPerms 权限与 RankBoard 排行榜。
 
-README 由 AI 生成。
+- **Mod ID**: `rime-tools`
+- **环境**: 服务端 + 客户端（客户端为可选增强）
 
-面向 Fabric 服务器的模块化工具模组，当前包含：
+## 功能特性
 
-- `teleport`：跨世界传送、地标、TPA、返回与随机传送。
-- `title`：基于 LuckPerms 的玩家头衔、聊天展示与 Placeholder API 支持。
+### 传送模块（Teleport）
 
-## 结构
+- **个人 / 公共传送点**：创建、传送、删除、描述、搜索、别名，支持 Unicode 名称与数量上限控制
+- **TPA 系统**：`/tpa`、`/tpahere`、接受/拒绝/取消，支持 TA 允许列表（allowlist）、请求超时与重复策略
+- **返回与位置记录**：死亡自动记录返回点（`/back`）、下线位置（`/last`）、他人私人传送点（`/tpother`）
+- **随机传送** `/rtp`：异步安全位置搜索，支持半径、并发与尝试次数配置
+- ️**安全检测**：传送前检查目标安全（虚空/水/危险方块/空间不足），支持确认（CONFIRM）或就近调整（NEARBY_SAFE）模式
+- **冷却与花费**：按传送类型独立冷却；可配置经验（EXP）与物品消耗，支持跨世界额外花费
+- **世界管控**：按世界白名单放行传送，跨世界传送权限独立控制
+- **客户端 GUI**：传送点管理界面（搜索/编辑/删除/传送）、玩家管理、假人传送；TPA 请求 Toast 通知与快捷键
+- **多语言消息**：内置 `zh_CN` / `en_US`，消息 YAML 可在 `config` 中覆盖并热重载
+- **数据持久化**：传送点/允许列表/离线位置原子写入，定期自动保存；支持从 STP（SimpleTpa）数据一键导入
 
-服务端由 `RimeTools` 通过 `ModuleRegistry` 统一注册并初始化 `RimeModule`；客户端由
-`RimeToolsClient` 通过 `ClientModuleRegistry` 注册并初始化 `RimeClientModule`。
-界面统一使用 `client.ui.RimeUi`，GUI 入口通过 `client.ui.ClientGuiRegistry` 开放注册，
-模块切换器自动收集所有已注册入口，不产生模块间 UI 依赖。
+### 称号模块（Title）
 
-**新增一个模块只需三步**，无需修改任何公共代码：
+- **玩家称号系统**：称号含稳定 ID、显示名、颜色、排序权重与启用状态，支持默认称号与回退颜色
+- **LuckPerms 权限**（可选）：按称号解锁选择，管理员可授予/撤销；未安装时回退为"无权限系统"模式
+- **聊天展示**：聊天中显示 `[ 称号 ] 玩家名: 消息` 前缀（自定义 chat type）
+- **PlaceholderAPI 占位符**：`%rime-tools:title%`、`%rime-tools:title_id%`、`%rime-tools:title_decorated%`
+- **RankBoard 排行授勋**（可选）：每周前 5 名 / 每月前 10 名自动授予对应排行称号，支持自定义结算时间与时区
+- **客户端 GUI**：头衔选择 / 头衔管理 / 玩家授权三个标签页，支持搜索、编辑、删除、权重与颜色配置
 
-1. 实现 `RimeModule`（服务端，可选 `RimeClientModule` 提供客户端行为）；
-2. 在 `RimeTools` / `RimeToolsClient` 的注册表各注册一次；
-3. 客户端模块在 `initializeClient` 中调用 `ClientGuiRegistry.register(id, label, opener)`
-   注册 GUI 入口，并在 `config/rime-tools/<模块 id>.yml` 放置配置文件。
+### Carpet 集成
 
-配置文件统一为 YAML 格式，一个模块一个配置文件：
+- **命令权限包装**：为所有 Carpet 命令（含扩展）自动生成 `carpet.command.<路径>` 权限节点，经 Fabric Permission API
+  校验；未设置时回退到 Carpet 原有规则/OP 检查
+- **假人创建者追踪**：记录 `player ... spawn` / `shadow` 创建的假人归属，实现"只有创建者能传送到该假人"
 
-- `config/rime-tools/teleport.yml`：传送模块服务端配置
-- `config/rime-tools/title.yml`：头衔模块服务端配置
-- `config/rime-tools/teleport-client.json`：传送模块客户端配置（客户端进程独立存储）
+## 环境要求
 
-传送模块的数据文件（传送点、TPA 白名单、离线位置等）位于
-`config/rime-tools/teleport/` 子目录，不属于配置文件。
+| 依赖              | 版本                |
+|-----------------|-------------------|
+| Minecraft       | `26.2`            |
+| Java            | `>= 25`           |
+| Fabric Loader   | `>= 0.19.3`       |
+| Fabric API      | `>= 0.156.0+26.2` |
+| Placeholder API | `>= 3.1.0-beta.1` |
+| Carpet          | `>= 26.2`         |
 
-头衔模块的 RankBoard 周榜与月榜结算配置位于 `config/rime-tools/title.yml`：
+**可选**（增强功能）:
 
-- `weekly-rank-awards.enabled`：启用周榜头衔结算。
-- `weekly-rank-awards.day`：每周结算日（如 `MONDAY`）。
-- `weekly-rank-awards.time`：结算时间（如 `"00:05"`）。
-- `weekly-rank-awards.zone`：结算所用时区（如 `Asia/Shanghai`）。
-- `monthly-rank-awards.enabled`：启用月榜头衔结算。
-- `monthly-rank-awards.day`：每月结算日（如 `1`）。
-- `monthly-rank-awards.time`：结算时间（如 `"00:05"`）。
-- `monthly-rank-awards.zone`：结算所用时区（如 `Asia/Shanghai`）。
+| 模组        | 作用                       |
+|-----------|--------------------------|
+| LuckPerms | 称号权限存储与校验（不装则称号选择/管理不可用） |
+| RankBoard | 周/月排行称号自动结算              |
+| Mod Menu  | 客户端配置入口                  |
 
-配置修改后需要重启服务器生效。若检测到旧布局
-（`config/rime-tools/teleport/config.yml` 或 `config/rime-tools/title.properties`），
-首次启动会自动迁移为新配置文件。
+## 安装
 
-传送模块的性能相关配置位于 `config/rime-tools/teleport.yml`：
+1. 安装 [Fabric Loader](https://fabricmc.net/use/) 并准备 Minecraft `26.2` 服务端/客户端。
+2. 将 `rime-tools` 及其**必需依赖**（Fabric API、Placeholder API、Carpet）放入 `mods/` 目录；可选模组按需添加。
+3. 启动服务器。首次启动会在 `config/rime-tools/` 下生成默认配置与消息文件，所有功能默认可用（管理员功能需要 OP 或权限节点）。
 
-- `random_teleport.max_concurrent_searches`：全服同时执行的随机传送搜索上限，默认 `2`。
-- `offline_player_retention_days`：离线位置保留天数，默认 `180`；设为 `0` 禁用按时间清理。
-- `offline_player_max_entries`：最多保留的离线位置数量，默认 `5000`；设为 `0` 不限制数量。
-- `offline_player_list_limit`：传送 GUI 返回的离线玩家数量上限，默认 `1000`；设为 `0` 不限制返回量。
+> 服务端与客户端均可安装本模组；仅在服务端安装时，玩家使用传送/称号的图形界面会退化为聊天文本交互。
 
-## 从旧版本升级
+## 模块架构
 
-升级到本版本后，命名空间统一为 `rime-tools`，配置统一为 YAML、一模块一配置文件。
-以下变化需要留意：
+本项目采用模块化设计：所有功能以 `RimeModule` 为单位注册到 `ModuleRegistry`（服务端）与 `ClientModuleRegistry`
+（客户端），由入口类统一初始化；任一模块初始化失败不会影响其他模块。
 
-### 配置文件（首次启动自动迁移）
-
-| 旧路径                                      | 新路径                              | 迁移方式                                                                                     |
-|------------------------------------------|----------------------------------|------------------------------------------------------------------------------------------|
-| `config/rime-tools/teleport/config.yml`  | `config/rime-tools/teleport.yml` | 自动复制（内容为 YAML，键名不变）                                                                      |
-| `config/rime-tools/title.properties`     | `config/rime-tools/title.yml`    | 自动转换（properties → YAML，键名从 `weekly-rank-awards-enabled` 变为 `weekly-rank-awards.enabled`） |
-| `config/rime-tools/teleport/`（传送点等数据文件）  | 不变                               | 无需迁移                                                                                     |
-| `config/rime-tools/teleport-client.json` | 不变                               | 无需迁移                                                                                     |
-
-自动迁移只在旧文件存在、新文件不存在时发生一次；迁移后旧文件保留作备份。
-如需手动迁移（例如自动迁移失败时）：
-
-- **传送模块**：把 `teleport/config.yml` 复制为 `teleport.yml`。
-- **头衔模块**：把 `title.properties` 改写为 YAML，例如：
-
-  ```yaml
-  default-title: 玩家
-  default-color: "#AAAAAA"
-  weekly-rank-awards:
-    enabled: true
-    day: MONDAY
-    time: "00:05"
-    zone: Asia/Shanghai
-  monthly-rank-awards:
-    enabled: true
-    day: 1
-    time: "00:05"
-    zone: Asia/Shanghai
-  ```
-
-### 权限节点（不会自动迁移，需要管理员手动处理）
-
-- **头衔模块**：所有 LuckPerms 节点从 `rime_tools.title.*` 改为 `rime-tools.title.*`。
-  旧节点在新版本不再生效，已授权玩家会失去头衔权限，需重新授权：
-
-  ```text
-  /lp group default permission set rime-tools.title.title.player true
-  /lp group vip permission set rime-tools.title.title.vip true
-  /lp user Admin permission set rime-tools.title.admin true
-  ```
-
-  可先查询旧授权再批量替换：`/lp group default permission info rime_tools.title.*`。
-- **传送模块**：旧前缀 `rime_tools.teleport.*`、`rime.teleport.*` 不再识别，
-  使用标准节点 `rime-tools:xxx`（或 `rime-tools.teleport.xxx` 兼容写法）。
-  旧版用权限插件按前缀授权的，需要把前缀替换为 `rime-tools.`。
-
-### 翻译 key（仅影响自定义资源包）
-
-客户端翻译 key 从 `rime_tools.*` 改为 `rime-tools.*`（如 `rime-tools.title.screen.title`）。
-若使用资源包覆盖过默认文本，需要同步替换 key；语言文件本身由模组内置，无需操作。
-
-### 不受影响
-
-- PlaceholderAPI 占位符：仍为 `%rime-tools:title%`、`%rime-tools:title_id%`、`%rime-tools:title_decorated%`。
-- 传送点、TPA 白名单、离线位置等数据文件。
-- 头衔授予记录与周榜/月榜结算状态（保存在世界存档中）。
-- 网络协议与客户端/服务端互通。
-
-### 回滚提示
-
-如果回滚到旧版本，新格式配置文件（`teleport.yml`、`title.yml`）与
-`rime-tools.title.*` 权限节点无法被旧版识别。回滚前建议先手动恢复旧路径配置与旧权限节点。
-
-## 命令
-
-尖括号表示必填参数，方括号表示可选参数。`/rime` 不带参数时会打开传送点界面，
-`/stp` 是 `/rime` 根命令的完整别名。
-
-### 传送点
-
-| 命令                                  | 说明                                        |
-|-------------------------------------|-------------------------------------------|
-| `/rime setp [-f] <名称> [描述]`         | 在当前位置创建私人传送点；`-f` 覆盖同名点。别名：`setpersonal`。 |
-| `/rime setg [-f] <名称> [描述]`         | 在当前位置创建公共传送点；`-f` 覆盖同名点。别名：`setglobal`。   |
-| `/rime tpp <名称>`                    | 传送到自己的私人传送点。别名：`tpersonal`。               |
-| `/rime tpg <名称>`                    | 传送到公共传送点。别名：`tglobal`。                    |
-| `/rime delp <名称>`                   | 删除自己的私人传送点。别名：`delpersonal`。              |
-| `/rime delg <名称>`                   | 删除公共传送点。别名：`delglobal`。                   |
-| `/rime list`                        | 列出私人和公共传送点。                               |
-| `/rime listp`                       | 只列出私人传送点。别名：`listpersonal`。               |
-| `/rime listg`                       | 只列出公共传送点。别名：`listglobal`。                 |
-| `/rime descp <名称> <描述>`             | 修改私人传送点描述。                                |
-| `/rime descg <名称> <描述>`             | 修改公共传送点描述。                                |
-| `/rime gui`                         | 打开自己的传送点管理界面。                             |
-| `/rime manage <在线玩家>`               | 管理指定玩家的传送点；仅管理员。                          |
-| `/rime tpother <玩家名或 UUID> [私人传送点]` | 打开其他玩家的私人点列表，或直接传送到指定点；需要相应权限。            |
-
-### 玩家传送
-
-| 命令                              | 说明                          |
-|---------------------------------|-----------------------------|
-| `/rime tp <在线玩家>`               | 将自己传送到目标玩家；默认需要管理权限。        |
-| `/rime tphere <在线玩家>`           | 将目标玩家传送到自己身边；默认需要管理权限。      |
-| `/rime tpa <在线玩家>`              | 请求传送到目标玩家。                  |
-| `/rime tpahere <在线玩家>`          | 请求目标玩家传送到自己身边。              |
-| `/rime accept [玩家]`             | 接受最新请求或指定玩家的请求。别名：`allow`。  |
-| `/rime deny [玩家]`               | 拒绝最新请求或指定玩家的请求。别名：`reject`。 |
-| `/rime cancel`                  | 取消自己发出的待处理 TPA 请求。          |
-| `/rime tpaallow <玩家名或 UUID>`    | 允许指定玩家以后直接传送到自己。            |
-| `/rime tpadisallow <玩家名或 UUID>` | 从直接传送允许列表移除玩家。              |
-| `/rime tpaallowlist`            | 查看自己的直接传送允许列表。              |
-| `/rime back`                    | 返回上一个位置或死亡位置。               |
-| `/rime last <玩家名或 UUID>`        | 传送到玩家最后一次下线的位置；需要相应权限。      |
-| `/rime rtp`                     | 在当前世界随机传送。                  |
-| `/rime confirm`                 | 确认一次不安全位置传送。                |
-| `/rime cancelconfirm`           | 取消待确认的不安全位置传送。              |
-
-### 管理与维护
-
-| 命令                                                                                          | 说明                                     |
-|---------------------------------------------------------------------------------------------|----------------------------------------|
-| `/rime help`                                                                                | 显示传送模块帮助。                              |
-| `/rime reload`                                                                              | 从磁盘重新加载配置、语言、传送点、TPA 允许列表和离线位置；仅管理员。   |
-| `/rime importstp [文件] [--include-back] [--clear] [--offline-uuid\|--raw-uuid\|--auto-uuid]` | 导入兼容数据；默认文件为 `example_data.json`，仅管理员。 |
-| `/rime testwp [名称]`                                                                         | 在当前位置创建测试公共传送点；仅管理员调试使用。               |
-
-`easy_tp` 启用时，也可以使用 `/rime <传送点名或在线玩家名>` 快速匹配传送目标。
-
-### 独立快捷命令
-
-下列命令直接映射到对应的 `/rime` 子命令：
-
-```text
-/setp  /tpp  /delp  /listp  /descp
-/setg  /tpg  /delg  /listg  /descg  /tplist
-/back  /last  /tpother
-/tpa  /tpahere  /tphere  /tpaccept  /tpdeny  /tpcancel
-/tpconfirm  /tpcancelconfirm
-/rtp  /tpr  /r
+```
+RimeTools (服务端入口)                RimeToolsClient (客户端入口)
+├── ModuleRegistry                   ├── ClientModuleRegistry
+│   ├── TeleportModule               │   ├── TeleportClientModule (GUI / Toast / 按键)
+│   └── TitleModule                  │   └── TitleClientModule (称号 GUI / 按键)
+└── (Carpet 集成: 权限包装、假人追踪)
 ```
 
-当 `commands.override_tp: true` 时还会注册 `/tp` 快捷命令。快捷命令接受与对应
-`/rime` 子命令相同的参数。
+新增模块只需实现 `RimeModule` 接口并在 `RimeTools#onInitialize` 中注册。
 
-### 头衔
+## 传送模块
 
-头衔命令仅在服务端安装 LuckPerms 后注册。
+### 命令
 
-| 命令                      | 说明                     |
-|-------------------------|------------------------|
-| `/title list`           | 列出所有已启用头衔。             |
-| `/title select <头衔 ID>` | 选择已通过 LuckPerms 解锁的头衔。 |
+根命令为 `/rime`（别名 `/stp`）。绝大多数子命令也有独立快捷命令。
 
-#### RankBoard 周榜与月榜头衔
+| 功能                | 命令                                                                                          |
+|-------------------|---------------------------------------------------------------------------------------------|
+| 打开传送 GUI（客户端）     | `/rime`（无参数）、`/rime gui`                                                                    |
+| 创建个人/公共传送点        | `/rime setp\|setpersonal [-f] <名称> [描述...]`、`/rime setg\|setglobal ...`                     |
+| 传送到传送点            | `/rime tpp\|tpersonal <名称>`、`/rime tpg\|tglobal <名称>`                                       |
+| 删除传送点             | `/rime delp\|delpersonal <名称>`、`/rime delg\|delglobal <名称>`                                 |
+| 列出传送点             | `/rime list`、`/rime listp\|listpersonal`、`/rime listg\|listglobal`                          |
+| 修改描述              | `/rime descp\|descg <名称> <描述...>`                                                           |
+| 直接传送 / 拉人         | `/rime tp <玩家>`、`/rime tphere <玩家>`                                                         |
+| TPA 请求            | `/rime tpa <玩家>`、`/rime tpahere <玩家>`                                                       |
+| 接受 / 拒绝 / 取消      | `/rime accept\|allow [玩家]`、`/rime deny\|reject [玩家]`、`/rime cancel`                         |
+| TA 允许列表           | `/rime tpaallow <玩家>`、`/rime tpadisallow <玩家>`、`/rime tpaallowlist`                         |
+| 返回死亡点             | `/rime back`                                                                                |
+| 传送到下线位置           | `/rime last <玩家>`                                                                           |
+| 传送到他人私人传送点        | `/rime tpother <玩家> <传送点>`                                                                  |
+| 随机传送              | `/rime rtp`（快捷：`/rtp`、`/tpr`、`/r`）                                                          |
+| 安全确认              | `/rime confirm`、`/rime cancelconfirm`                                                       |
+| 管理他人传送点（管理员）      | `/rime manage <玩家>`                                                                         |
+| 测试传送点（调试）         | `/rime testwp <名称>`                                                                         |
+| 重载配置与数据           | `/rime reload`                                                                              |
+| 从 STP 导入          | `/rime importstp [文件] [--include-back] [--offline-uuid\|--raw-uuid\|--auto-uuid] [--clear]` |
+| 简易传送（配置开启时）       | `/rime <玩家名>`（自动判断 `/tp` 或 `/tpa`）                                                          |
+| 覆盖原版 `/tp`（配置开启时） | `/tp <玩家>`                                                                                  |
 
-同时安装 RankBoard 与 LuckPerms 后，模组默认在每周一 `00:05`（`Asia/Shanghai`）
-结算前一个完整周一至周日。每个 RankBoard 榜单取分数大于 `0` 的前五名，并在头衔库中
-创建 `weekly_<榜单 ID>_t<名次>`，显示名称格式为 `周<榜单>T<名次>`，例如
-`周大胃王榜T1`。
+可用快捷命令：`setp` `tpp` `delp` `listp` `descp` `setg` `tpg` `delg` `listg` `descg` `tplist` `back` `last` `tpother`
+`tpa` `tpahere` `tphere` `tpaccept` `tpdeny` `tpcancel` `tpconfirm` `tpcancelconfirm` `rtp` `tpr` `r`。
 
-- 周榜 T1 在聊天和 PlaceholderAPI 中按字符使用彩虹渐变，头衔库预览色跟随 RankBoard 榜单配置。
-- 周榜 T2 至 T5 使用金黄色 `#FFD700`。
-- 每次周榜结算会先撤销上一周的全部周榜头衔，再发放新结果；掉出前五名会自动失去对应头衔。
+### 权限节点
 
-每月第一天 `00:05` 结算上个月每个榜单的前十名，创建
-`monthly_<榜单 ID>_t<名次>`，显示名称格式为 `<yy>年<MM>月<榜单>T<名次>`，例如
-`26年7月大胃王榜T1`。
+权限经 Fabric Permission API（`namespace:path` 格式）校验，可由 LuckPerms 等权限模组管理。下表"默认值"指权限**未设置**
+时对该玩家的回退行为。
 
-- 月榜 T1 至 T3 在聊天和 PlaceholderAPI 中按字符使用彩虹渐变；T1 头衔库预览色跟随 RankBoard 榜单配置，T2、T3 预览色为金黄色
-  `#FFD700`。
-- 月榜 T2、T3 使用金黄色 `#FFD700`。
-- 月榜 T4 至 T10 使用绿色 `#55FF55`。
-- 月榜头衔结算后不会自动收回，玩家可以长期佩戴。
-- 结算日期和获奖权限会保存在世界存档中，重启不会重复发放。
-- RankBoard 历史缓存或完整周期边界尚未就绪时，本次结算会延后重试。
+| 节点                           | 用途                                         | 默认     |
+|------------------------------|--------------------------------------------|--------|
+| `rime-tools:admin`           | 管理员（传送点管理、`/rime reload`、`/rime manage` 等） | OP 2 级 |
+| `rime-tools:personal`        | 创建/删除/修改个人传送点                              | 允许     |
+| `rime-tools:personal/tp`     | 传送到个人传送点                                   | 允许     |
+| `rime-tools:global`          | 创建/删除/修改公共传送点                              | 拒绝     |
+| `rime-tools:global/tp`       | 传送到公共传送点                                   | 允许     |
+| `rime-tools:tp`              | 直接传送 `/rime tp`                            | 拒绝     |
+| `rime-tools:tphere`          | 拉人 `/rime tphere`                          | 拒绝     |
+| `rime-tools:tpa`             | TPA 请求                                     | 允许     |
+| `rime-tools:tpahere`         | TPAHERE 请求                                 | 允许     |
+| `rime-tools:tpa/allowlist`   | 管理 TA 允许列表                                 | 允许     |
+| `rime-tools:crossworld`      | 跨世界传送                                      | 拒绝     |
+| `rime-tools:back`            | `/rime back`                               | 允许     |
+| `rime-tools:last`            | `/rime last <玩家>`                          | 拒绝     |
+| `rime-tools:other_personal`  | `/rime tpother`                            | 拒绝     |
+| `rime-tools:rtp`             | 随机传送                                       | 允许     |
+| `rime-tools:easy`            | 简易传送 `/rime <玩家名>`                         | 允许     |
+| `rime-tools:list`            | 查看传送点列表                                    | 允许     |
+| `rime-tools:cooldown/bypass` | 无视传送冷却                                     | 拒绝     |
+| `rime-tools:cost/bypass`     | 无视传送花费                                     | 拒绝     |
+| `rime-tools:safety/bypass`   | 跳过安全检测                                     | 拒绝     |
 
-### 客户端调试命令
+### 配置
 
-这些命令只在安装了模组客户端时存在，用于测试 TPA 提示界面：
+配置文件：`config/rime-tools/teleport.yml`（服务端自动生成，修改后 `/rime reload` 生效）。
 
-| 命令                        | 说明                         |
-|---------------------------|----------------------------|
-| `/rimenotify`             | 循环切换 TPA 通知样式。             |
-| `/rimetest tpa <玩家> [类型]` | 创建测试 TPA 通知；类型为 `0` 或 `1`。 |
-| `/rimetest result <玩家>`   | 将指定玩家的测试请求标记为已接受。          |
-| `/rimetest toast`         | 一次创建两条测试通知。                |
+主要选项：
 
-## Placeholder API
+| 选项                                                | 说明                                         | 默认                                            |
+|---------------------------------------------------|--------------------------------------------|-----------------------------------------------|
+| `default_locale`                                  | 消息默认语言（`en_US` / `zh_CN`）                  | `en_US`                                       |
+| `worlds`                                          | 允许传送的世界白名单（空 = 全部）                         | 三个主世界                                         |
+| `easy_tp`                                         | 启用 `/rime <名称>` 简易传送                       | `true`                                        |
+| `allow_unicode_names`                             | 传送点名称允许非 ASCII 字符                          | `false`                                       |
+| `waypoint_name_max_length`                        | 传送点名称最大长度                                  | `24`                                          |
+| `personal_max_waypoints` / `global_max_waypoints` | 个人 / 公共传送点数量上限                             | `10` / `100`                                  |
+| `save_interval_seconds`                           | 自动保存间隔（0 = 关闭）                             | `120`                                         |
+| `offline_player_retention_days`                   | 下线位置保留天数（0 = 不过期）                          | `180`                                         |
+| `offline_player_max_entries`                      | 下线位置保留条数上限（0 = 不限）                         | `5000`                                        |
+| `back_on_death`                                   | 死亡时记录返回点                                   | `true`                                        |
+| `tpa_timeout_seconds`                             | TPA 请求超时                                   | `60`                                          |
+| `tpa_duplicate_policy`                            | 重复请求策略：`REJECT` / `REPLACE`                | `REJECT`                                      |
+| `confirm_timeout_seconds`                         | 安全确认超时                                     | `15`                                          |
+| `cooldown`                                        | 各传送类型冷却（秒）                                 | waypoint `5` / tp `10` / back `10` / rtp `60` |
+| `random_teleport`                                 | 随机传送开关、最小/最大半径、尝试次数、并发搜索数                  | 开启，500–5000                                   |
+| `cost`                                            | 传送花费（EXP/物品、跨世界模式与附加费）                     | 默认关闭                                          |
+| `safety_check`                                    | 安全检测（`CONFIRM` / `NEARBY_SAFE`、搜索范围、禁止水域等） | 开启                                            |
+| `commands.override_tp`                            | 用本模组 `/tp` 覆盖原版命令                          | `false`                                       |
 
-占位符使用 Placeholder API 的 `%命名空间:路径%` 格式：
+### 消息与数据
 
-| 占位符                            | 返回内容                                        |
-|--------------------------------|---------------------------------------------|
-| `%rime-tools:title%`           | 当前玩家可见头衔，保留头衔颜色；没有可见头衔时返回配置中的默认头衔。          |
-| `%rime-tools:title_id%`        | 当前可见头衔的稳定 ID；没有头衔时返回空字符串。仅安装 LuckPerms 时注册。 |
-| `%rime-tools:title_decorated%` | 带方括号装饰和颜色的头衔，例如 `[ 管理员 ]`。                  |
+- 消息文件：`config/rime-tools/teleport/messages_zh_CN.yml`、`messages_en_US.yml`（可覆盖内置默认值，`/rime reload` 热加载）
+- 数据目录：`config/rime-tools/teleport/` 下保存传送点、TPA 允许列表与下线位置数据（原子写入、自动保存）
+- 旧版兼容：自动将旧版 `teleport/config.yml` 迁移为 `teleport.yml`
 
-示例：
+## 称号模块
 
-```text
-%rime-tools:title% %player:name%: %message%
-%rime-tools:title_decorated% %player:name%
+### 命令
+
+| 命令                   | 说明             |
+|----------------------|----------------|
+| `/title list`        | 列出所有已启用的称号     |
+| `/title select <id>` | 选择（佩戴）一个已解锁的称号 |
+
+> 称号的管理（新建、编辑、删除、授权）在客户端 GUI 中完成；服务端命令仅提供列表与选择。
+
+### 权限节点（LuckPerms）
+
+| 节点                              | 用途          |
+|---------------------------------|-------------|
+| `rime-tools.title.admin`        | 称号系统管理员     |
+| `rime-tools.title.admin.titles` | 称号管理（增删改）   |
+| `rime-tools.title.admin.assign` | 玩家授权（授予/撤销） |
+| `rime-tools.title.title.<id>`   | 解锁指定称号      |
+
+未安装 LuckPerms 时，称号选择与后台管理不可用，但已选称号仍可正常展示。
+
+### PlaceholderAPI 占位符
+
+| 占位符                            | 说明                      |
+|--------------------------------|-------------------------|
+| `%rime-tools:title%`           | 当前玩家称号（含颜色，未解锁回退默认称号）   |
+| `%rime-tools:title_id%`        | 当前称号的稳定 ID（需 LuckPerms） |
+| `%rime-tools:title_decorated%` | 装饰样式称号（`[ 称号 ]`）        |
+
+### 排行授勋（RankBoard）
+
+在 `config/rime-tools/title.yml` 中配置：
+
+- **每周排行**：每周结算日/时间/时区可配，前 5 名获得 `周<榜单>T1..T5` 称号
+- **每月排行**：每月结算日/时间/时区可配，前 10 名获得 `月<榜单>T1..T10` 称号
+
+RankBoard 不可用时自动禁用结算并在日志中提示。
+
+### 配置
+
+配置文件：`config/rime-tools/title.yml`（首次启动自动生成）：
+
+| 选项                    | 说明                                         | 默认                         |
+|-----------------------|--------------------------------------------|----------------------------|
+| `default-title`       | 未佩戴称号时显示的默认称号                              | `玩家`                       |
+| `default-color`       | 默认称号颜色                                     | `#AAAAAA`                  |
+| `weekly-rank-awards`  | 周排行授勋（`enabled` / `day` / `time` / `zone`） | 周一 00:05 Asia/Shanghai     |
+| `monthly-rank-awards` | 月排行授勋（`enabled` / `day` / `time` / `zone`） | 每月 1 日 00:05 Asia/Shanghai |
+
+旧版 `title.properties` 配置会在首次启动时自动迁移为 YAML。
+
+## 客户端功能（可选）
+
+- **传送 GUI**（按键 `G`，可在按键设置中修改）：传送点管理（搜索、新建、编辑、删除、传送）、玩家传送（TPA / TPAHERE / 下线位置 /
+  私人点）、在线假人传送
+- **TPA Toast 通知**：收到/发出传送请求时屏幕上方弹出提示，可点击或按键（默认 `Y` 接受、`N` 拒绝）处理
+- **称号 GUI**（按键 `H`）：我的头衔 / 头衔管理 / 玩家授权
+- 客户端命令 `/rimenotify`：循环切换 TPA 通知样式 `TOAST → CHAT → BOTH`（配置保存在
+  `config/rime-tools/teleport-client.json`）
+- 模块切换器：各 GUI 左上角的模块下拉菜单，用于在传送/称号界面间切换
+
+## 构建与开发
+
+环境要求：JDK 25、Gradle 9.6.1（通过 wrapper 自动下载）。
+
+```bash
+# 构建（产物在 build/libs/，jar 名形如 rime-tools-1.0.0-fabric0.19.3+mc26.2.jar）
+./gradlew build
+
+# 运行测试（JUnit 5）
+./gradlew test
+
+# 启动开发服务器 / 客户端
+./gradlew runServer
+./gradlew runClient
 ```
 
-本模组目前只注册以上三个头衔占位符，传送模块没有注册 Placeholder API 占位符。
+- 依赖的 SnakeYAML 已 shade 进产物 jar，无需额外安装
+- 源码结构：`src/main`（服务端逻辑）、`src/client`（客户端逻辑）、`src/test`（单元测试）
+- 持续集成：GitHub Actions（`.github/workflows/build-and-release.yml`）在推送 `v*` tag 时自动构建并发布 GitHub Release
 
-## 权限节点
+## 常见问题
 
-### 传送模块
+- **Q: 安装后提示缺少依赖？** 请确保 Fabric API、Placeholder API、Carpet 均安装且版本满足要求，Java 版本不低于 25。
+- **Q: 玩家无法使用称号选择？** 称号选择依赖 LuckPerms；请确认服务端已安装 LuckPerms 且玩家拥有
+  `rime-tools.title.title.<id>` 权限。
+- **Q: 传送被提示"不安全"？** 目标位置可能处于虚空、水中或空间不足；可让玩家使用 `/rime confirm` 强制确认，或由管理员配置
+  `safety_check`、授予 `rime-tools:safety/bypass`。
+- **Q: 如何迁移旧传送插件数据？** 将 STP（SimpleTpa）导出的 JSON 文件放入 `config/rime-tools/teleport/` 目录，执行
+  `/rime importstp <文件名>`（可加 `--include-back`、UUID 模式等参数，详见 `/rime help`）。
 
-传送模块通过 Fabric Permission API 检查权限，节点是 Minecraft Identifier，格式为
-`rime-tools:路径`。`默认开放`表示没有权限插件覆盖时普通玩家也可使用；`仅管理员`
-表示默认要求服务器管理员权限。拥有 `rime-tools:admin` 会绕过传送模块的其他权限检查。
+## 许可证
 
-| 权限节点                         | 默认值  | 控制内容                                                    |
-|------------------------------|------|---------------------------------------------------------|
-| `rime-tools:admin`           | 仅管理员 | `/rime reload`、`manage`、`importstp`、`testwp`，并绕过所有传送权限。 |
-| `rime-tools:personal`        | 默认开放 | 创建、覆盖、编辑和删除自己的私人传送点。                                    |
-| `rime-tools:personal/tp`     | 默认开放 | 传送到自己的私人传送点。                                            |
-| `rime-tools:global`          | 仅管理员 | 创建、覆盖、编辑和删除公共传送点。                                       |
-| `rime-tools:global/tp`       | 默认开放 | 传送到公共传送点。                                               |
-| `rime-tools:list`            | 默认开放 | 使用传送点列表命令。                                              |
-| `rime-tools:tp`              | 仅管理员 | 使用 `/rime tp` 直接传送到其他玩家。                                |
-| `rime-tools:tphere`          | 仅管理员 | 使用 `/rime tphere` 拉取其他玩家。                               |
-| `rime-tools:tpa`             | 默认开放 | 发送 `/rime tpa` 请求。                                      |
-| `rime-tools:tpahere`         | 默认开放 | 发送 `/rime tpahere` 请求。                                  |
-| `rime-tools:tpa/allowlist`   | 默认开放 | 管理和查看 TPA 直接传送允许列表。                                     |
-| `rime-tools:back`            | 默认开放 | 使用 `/rime back`。                                        |
-| `rime-tools:last`            | 仅管理员 | 传送到玩家最后下线位置。                                            |
-| `rime-tools:other_personal`  | 仅管理员 | 查看并传送到其他玩家的私人传送点。                                       |
-| `rime-tools:rtp`             | 默认开放 | 使用随机传送。                                                 |
-| `rime-tools:easy`            | 默认开放 | 使用 `/rime <名称>` 快速匹配。                                   |
-| `rime-tools:crossworld`      | 仅管理员 | 允许跨世界传送。                                                |
-| `rime-tools:cooldown/bypass` | 仅管理员 | 绕过所有传送冷却。                                               |
-| `rime-tools:cost/bypass`     | 仅管理员 | 绕过经验和物品消耗。                                              |
-| `rime-tools:safety/bypass`   | 仅管理员 | 绕过目标位置安全检查。                                             |
-
-示例取决于服务器安装的 Fabric 权限提供器。使用支持 Identifier 节点的 LuckPerms
-桥接时，授权形式类似：
-
-```text
-/lp group default permission set rime-tools:personal true
-/lp group default permission set rime-tools:global/tp true
-/lp user Steve permission set rime-tools:crossworld true
-```
-
-### 头衔模块
-
-头衔模块直接使用 LuckPerms 权限节点。所有节点都需要明确授予：
-
-| 权限节点                             | 控制内容                              |
-|----------------------------------|-----------------------------------|
-| `rime-tools.title.admin`         | 允许进入头衔定义管理和玩家授权界面，相当于后两个管理节点的总权限。 |
-| `rime-tools.title.admin.titles`  | 新建、编辑和删除头衔定义。                     |
-| `rime-tools.title.admin.assign`  | 查看已知玩家并授予或撤销其头衔。                  |
-| `rime-tools.title.title.<头衔 ID>` | 解锁指定头衔，允许玩家选择并显示该头衔。              |
-
-周榜与月榜头衔使用同一权限格式，例如
-`rime-tools.title.title.weekly_food_t1` 和 `rime-tools.title.title.monthly_food_t1`。
-周榜权限由结算服务自动授予并在掉出前五时自动撤销；月榜权限只增不删，不建议手动维护。
-
-`rime-tools.title.admin` 只授予管理能力，不会自动为管理员自己解锁每个头衔；仍需
-授予对应的 `rime-tools.title.title.<头衔 ID>`。
-
-```text
-/lp group default permission set rime-tools.title.title.player true
-/lp group vip permission set rime-tools.title.title.vip true
-/lp user Admin permission set rime-tools.title.admin true
-```
-
-## 依赖
-
-- Fabric Loader、Fabric API、Placeholder API、Carpet：必需
-- LuckPerms：启用头衔选择与管理，以及 Carpet 命令权限节点
-- RankBoard：启用周榜与月榜排行榜头衔结算
-- Mod Menu：提供头衔管理界面入口
-
-## 构建
-
-```powershell
-.\gradlew.bat build
-```
+本项目许可证信息见 [LICENSE.txt](LICENSE.txt)。分发或修改前请阅读许可条款。
