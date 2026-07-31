@@ -22,10 +22,16 @@
     ]
   },
   "mixins": [
-    "rime-tools.mixins.json",
     {
       "config": "rime-tools-carpet.mixins.json",
       "environment": "server"
+    },
+    {
+      "config": "rime-tools-teleport.mixins.json",
+      "environment": "server"
+    },
+    {
+      "config": "rime-tools-chat.mixins.json"
     }
   ],
   "depends": {

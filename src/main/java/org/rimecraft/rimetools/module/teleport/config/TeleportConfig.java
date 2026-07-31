@@ -26,6 +26,9 @@ public final class TeleportConfig {
     public final boolean backOnDeath;
     public final int tpaTimeoutSeconds;
     public final DuplicatePolicy tpaDuplicatePolicy;
+    public final int tpaRequestCooldownSeconds;
+    public final int tpaTargetChatLimit;
+    public final int tpaTargetChatWindowSeconds;
     public final int confirmTimeoutSeconds;
     public final String defaultLocale;
     public final CooldownConfig cooldown;
@@ -48,6 +51,9 @@ public final class TeleportConfig {
         backOnDeath = bool(root, "back_on_death", true);
         tpaTimeoutSeconds = integer(root, "tpa_timeout_seconds", 60);
         tpaDuplicatePolicy = enumValue(DuplicatePolicy.class, string(root, "tpa_duplicate_policy", "REJECT"), DuplicatePolicy.REJECT);
+        tpaRequestCooldownSeconds = Math.max(0, integer(root, "tpa_request_cooldown_seconds", 5));
+        tpaTargetChatLimit = Math.max(0, integer(root, "tpa_target_chat_limit", 5));
+        tpaTargetChatWindowSeconds = Math.max(1, integer(root, "tpa_target_chat_window_seconds", 10));
         confirmTimeoutSeconds = Math.clamp(integer(root, "confirm_timeout_seconds", 15), 5, 3600);
         defaultLocale = string(root, "default_locale", "en_US");
 

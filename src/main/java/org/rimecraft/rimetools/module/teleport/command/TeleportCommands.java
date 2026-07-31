@@ -40,7 +40,8 @@ public final class TeleportCommands {
     private static final List<String> SUB_COMMANDS = List.of(
             "help", "setp", "setg", "tpp", "tpg", "delp", "delg", "list", "listp", "listg",
             "descp", "descg", "tp", "tphere", "tpa", "tpahere", "accept", "deny", "cancel",
-            "tpaallow", "tpadisallow", "tpaallowlist", "back", "last", "tpother", "rtp", "confirm", "cancelconfirm", "reload", "importstp",
+            "tpaallow", "tpadisallow", "tpaallowlist", "tpablock", "tpaunblock", "tpablocklist",
+            "back", "last", "tpother", "rtp", "confirm", "cancelconfirm", "reload", "importstp",
             "gui", "manage", "testwp"
     );
 
@@ -135,6 +136,9 @@ public final class TeleportCommands {
             case "tpaallow" -> updateAllowlist(source, args, true);
             case "tpadisallow" -> updateAllowlist(source, args, false);
             case "tpaallowlist" -> showAllowlist(source);
+            case "tpablock" -> updateBlocklist(source, args, true);
+            case "tpaunblock" -> updateBlocklist(source, args, false);
+            case "tpablocklist" -> showBlocklist(source);
             case "back" -> back(source);
             case "last" -> lastPosition(source, args);
             case "tpother" -> teleportOtherPersonal(source, args);
@@ -308,24 +312,36 @@ public final class TeleportCommands {
         if (!from.world().equalsIgnoreCase(destination.world()) && !Permissions.has(player, "crossworld", false)) {
             return message(source, "world.crossworld_denied", "world", destination.world());
         }
+        if (mod.blocklist().isBlocked(player.getUUID(), target.getUUID())
+                || mod.blocklist().isBlocked(target.getUUID(), player.getUUID())) {
+            return message(source, "tpa.blocked");
+        }
         if (toTarget && mod.allowlist().isAllowed(target.getUUID(), player.getUUID())) {
             TeleportService.Result result = mod.teleports().teleport(player, destination, TeleportType.TPA, false);
             if (result == TeleportService.Result.SUCCESS) {
                 message(source, "tpa.auto.sent", "player", target.getName().getString());
                 mod.messages().send(target, "tpa.auto.received", MessageService.vars("player", player.getName().getString()));
+                ServerPlayNetworking.send(target, new TpaToastPayload(
+                        player.getName().getString(), TpaToastPayload.TYPE_AUTO, 3, false));
             }
             return result == TeleportService.Result.SUCCESS ? 1 : 0;
         }
 
         long now = Instant.now().getEpochSecond();
+        long cooldown = mod.tpa().cooldownRemaining(player.getUUID(), target.getUUID(), now,
+                mod.config().tpaRequestCooldownSeconds);
+        if (cooldown > 0) return message(source, "tpa.rate_limited", "seconds", cooldown);
         TpaManager.TpaRequest request = new TpaManager.TpaRequest(player.getUUID(), target.getUUID(),
                 toTarget ? TpaManager.Type.TO_TARGET : TpaManager.Type.HERE, now, now + mod.config().tpaTimeoutSeconds);
         if (!mod.tpa().add(request, mod.config().tpaDuplicatePolicy)) return message(source, "tpa.duplicate");
         Component accept = mod.messages().button(target, "tpa.accept.label", "/rime accept " + player.getName().getString(), "tpa.accept.hover", false);
         Component deny = mod.messages().button(target, "tpa.deny.label", "/rime deny " + player.getName().getString(), "tpa.deny.hover", false);
-        mod.messages().send(target, toTarget ? "tpa.request.to_target" : "tpa.request.here",
-                MessageService.vars("player", player.getName().getString(), "accept", accept, "deny", deny));
-        target.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0f, 0.5f);
+        if (mod.tpa().allowTargetChat(target.getUUID(), now,
+                mod.config().tpaTargetChatLimit, mod.config().tpaTargetChatWindowSeconds)) {
+            mod.messages().send(target, toTarget ? "tpa.request.to_target" : "tpa.request.here",
+                    MessageService.vars("player", player.getName().getString(), "accept", accept, "deny", deny));
+            target.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0f, 0.5f);
+        }
         ServerPlayNetworking.send(target, new TpaToastPayload(
                 player.getName().getString(), toTarget ? 0 : 1, mod.config().tpaTimeoutSeconds, false));
         ServerPlayNetworking.send(player, new TpaToastPayload(
@@ -418,6 +434,37 @@ public final class TeleportCommands {
                 .map(uuid -> displayPlayerName(uuid, uuid.toString()))
                 .toList();
         return message(source, "tpa.allow.list", "list", String.join(", ", names));
+    }
+
+    private int updateBlocklist(CommandSourceStack source, String[] args, boolean add) {
+        ServerPlayer player = player(source);
+        if (player == null) return 0;
+        if (!Permissions.has(player, "tpa.allowlist", true)) return denied(source);
+        if (args.length < 2) return message(source, add ? "usage.tpablock" : "usage.tpaunblock");
+        String target = args[1];
+        ServerPlayer online = findPlayer(target);
+        UUID uuid = online == null ? parseUuid(target) : online.getUUID();
+        if (uuid == null) uuid = mod.offlinePositions().findPlayerId(target);
+        if (uuid == null && add) uuid = StpImporter.offlineUuid(target);
+        if (uuid == null) return message(source, "tpa.allow.not_found", "player", target);
+        if (uuid.equals(player.getUUID())) return message(source, "tpa.self");
+        boolean changed = add ? mod.blocklist().add(player.getUUID(), uuid) : mod.blocklist().remove(player.getUUID(), uuid);
+        mod.blocklist().saveIfDirty();
+        String key = add ? (changed ? "tpa.block.added" : "tpa.block.exists")
+                : (changed ? "tpa.block.removed" : "tpa.block.not_found");
+        return message(source, key, "player", displayPlayerName(uuid, target));
+    }
+
+    private int showBlocklist(CommandSourceStack source) {
+        ServerPlayer player = player(source);
+        if (player == null) return 0;
+        if (!Permissions.has(player, "tpa.allowlist", true)) return denied(source);
+        List<UUID> values = mod.blocklist().list(player.getUUID());
+        if (values.isEmpty()) return message(source, "tpa.block.list_empty");
+        List<String> names = values.stream()
+                .map(uuid -> displayPlayerName(uuid, uuid.toString()))
+                .toList();
+        return message(source, "tpa.block.list", "list", String.join(", ", names));
     }
 
     private int lastPosition(CommandSourceStack source, String[] args) {

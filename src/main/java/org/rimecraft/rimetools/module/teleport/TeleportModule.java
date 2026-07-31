@@ -15,10 +15,7 @@ import org.rimecraft.rimetools.module.teleport.i18n.MessageService;
 import org.rimecraft.rimetools.module.teleport.manager.*;
 import org.rimecraft.rimetools.module.teleport.model.TeleportPosition;
 import org.rimecraft.rimetools.module.teleport.network.TeleportNetworking;
-import org.rimecraft.rimetools.module.teleport.repository.OfflinePositionRepository;
-import org.rimecraft.rimetools.module.teleport.repository.RepositoryWriter;
-import org.rimecraft.rimetools.module.teleport.repository.TpaAllowlistRepository;
-import org.rimecraft.rimetools.module.teleport.repository.WaypointRepository;
+import org.rimecraft.rimetools.module.teleport.repository.*;
 import org.rimecraft.rimetools.module.teleport.safety.SafetyChecker;
 import org.rimecraft.rimetools.module.teleport.teleport.RandomTeleportService;
 import org.rimecraft.rimetools.module.teleport.teleport.TeleportService;
@@ -29,6 +26,7 @@ import java.nio.file.Path;
 
 public final class TeleportModule implements RimeModule {
     public static final String ID = "teleport";
+    public static TeleportModule INSTANCE;
 
     private final BackManager backs = new BackManager();
     private final CooldownManager cooldowns = new CooldownManager();
@@ -42,6 +40,7 @@ public final class TeleportModule implements RimeModule {
     private MessageService messages;
     private WaypointRepository waypoints;
     private TpaAllowlistRepository allowlist;
+    private TpaBlocklistRepository blocklist;
     private OfflinePositionRepository offlinePositions;
     private TeleportService teleports;
     private RandomTeleportService randomTeleports;
@@ -73,6 +72,7 @@ public final class TeleportModule implements RimeModule {
 
     @Override
     public void initialize(RimeModuleContext context) {
+        INSTANCE = this;
         logger = context.logger();
         dataDirectory = context.moduleDirectory(id());
         configFile = context.configFile(TeleportModule.ID);
@@ -87,6 +87,8 @@ public final class TeleportModule implements RimeModule {
             requireLoaded(waypoints.load(), "waypoint data");
             allowlist = new TpaAllowlistRepository(dataDirectory, context.logger(), repositoryWriter);
             requireLoaded(allowlist.load(), "TPA allowlist");
+            blocklist = new TpaBlocklistRepository(dataDirectory, context.logger(), repositoryWriter);
+            requireLoaded(blocklist.load(), "TPA blocklist");
             offlinePositions = new OfflinePositionRepository(dataDirectory, context.logger(), repositoryWriter,
                     config.offlinePlayerRetentionDays, config.offlinePlayerMaxEntries, config.offlinePlayerListLimit);
             requireLoaded(offlinePositions.load(), "offline positions");
@@ -127,6 +129,7 @@ public final class TeleportModule implements RimeModule {
     private void onServerStopping(MinecraftServer server) {
         waypoints.saveIfDirty();
         allowlist.saveIfDirty();
+        blocklist.saveIfDirty();
         offlinePositions.saveIfDirty();
         repositoryWriter.close();
         this.server = null;
@@ -144,6 +147,7 @@ public final class TeleportModule implements RimeModule {
         if (saveInterval > 0 && ticks % saveInterval == 0) {
             waypoints.saveIfDirty();
             allowlist.saveIfDirty();
+            blocklist.saveIfDirty();
             offlinePositions.saveIfDirty();
         }
     }
@@ -157,17 +161,20 @@ public final class TeleportModule implements RimeModule {
 
             WaypointRepository nextWaypoints = new WaypointRepository(dataDirectory, logger, repositoryWriter);
             TpaAllowlistRepository nextAllowlist = new TpaAllowlistRepository(dataDirectory, logger, repositoryWriter);
+            TpaBlocklistRepository nextBlocklist = new TpaBlocklistRepository(dataDirectory, logger, repositoryWriter);
             OfflinePositionRepository nextOfflinePositions = new OfflinePositionRepository(dataDirectory, logger, repositoryWriter,
                     nextConfig.offlinePlayerRetentionDays, nextConfig.offlinePlayerMaxEntries,
                     nextConfig.offlinePlayerListLimit);
             requireLoaded(nextWaypoints.load(), "waypoint data");
             requireLoaded(nextAllowlist.load(), "TPA allowlist");
+            requireLoaded(nextBlocklist.load(), "TPA blocklist");
             requireLoaded(nextOfflinePositions.load(), "offline positions");
 
             config = nextConfig;
             messages = nextMessages;
             waypoints = nextWaypoints;
             allowlist = nextAllowlist;
+            blocklist = nextBlocklist;
             offlinePositions = nextOfflinePositions;
             rebuildTeleportPipeline();
             logger.info("Reloaded teleport data: {} personal waypoints, {} global waypoints",
@@ -209,6 +216,10 @@ public final class TeleportModule implements RimeModule {
 
     public TpaAllowlistRepository allowlist() {
         return allowlist;
+    }
+
+    public TpaBlocklistRepository blocklist() {
+        return blocklist;
     }
 
     public OfflinePositionRepository offlinePositions() {

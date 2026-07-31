@@ -32,6 +32,7 @@ public record TpaToastPayload(
     };
     public static final int TYPE_TO_TARGET = 0;
     public static final int TYPE_HERE = 1;
+    public static final int TYPE_AUTO = 2;
 
     @Override
     public Type<? extends CustomPacketPayload> type() {

@@ -96,6 +96,7 @@ RimeTools (服务端入口)                RimeToolsClient (客户端入口)
 | TPA 请求            | `/rime tpa <玩家>`、`/rime tpahere <玩家>`                                                       |
 | 接受 / 拒绝 / 取消      | `/rime accept\|allow [玩家]`、`/rime deny\|reject [玩家]`、`/rime cancel`                         |
 | TA 允许列表           | `/rime tpaallow <玩家>`、`/rime tpadisallow <玩家>`、`/rime tpaallowlist`                         |
+| TA 屏蔽列表           | `/rime tpablock <玩家>`、`/rime tpaunblock <玩家>`、`/rime tpablocklist`                          |
 | 返回死亡点             | `/rime back`                                                                                |
 | 传送到下线位置           | `/rime last <玩家>`                                                                           |
 | 传送到他人私人传送点        | `/rime tpother <玩家> <传送点>`                                                                  |
@@ -127,7 +128,7 @@ RimeTools (服务端入口)                RimeToolsClient (客户端入口)
 | `rime-tools:tphere`          | 拉人 `/rime tphere`                          | 拒绝     |
 | `rime-tools:tpa`             | TPA 请求                                     | 允许     |
 | `rime-tools:tpahere`         | TPAHERE 请求                                 | 允许     |
-| `rime-tools:tpa/allowlist`   | 管理 TA 允许列表                                 | 允许     |
+| `rime-tools:tpa/allowlist`   | 管理 TA 允许列表与屏蔽列表                            | 允许     |
 | `rime-tools:crossworld`      | 跨世界传送                                      | 拒绝     |
 | `rime-tools:back`            | `/rime back`                               | 允许     |
 | `rime-tools:last`            | `/rime last <玩家>`                          | 拒绝     |
@@ -145,26 +146,28 @@ RimeTools (服务端入口)                RimeToolsClient (客户端入口)
 
 主要选项：
 
-| 选项                                                | 说明                                         | 默认                                            |
-|---------------------------------------------------|--------------------------------------------|-----------------------------------------------|
-| `default_locale`                                  | 消息默认语言（`en_US` / `zh_CN`）                  | `en_US`                                       |
-| `worlds`                                          | 允许传送的世界白名单（空 = 全部）                         | 三个主世界                                         |
-| `easy_tp`                                         | 启用 `/rime <名称>` 简易传送                       | `true`                                        |
-| `allow_unicode_names`                             | 传送点名称允许非 ASCII 字符                          | `false`                                       |
-| `waypoint_name_max_length`                        | 传送点名称最大长度                                  | `24`                                          |
-| `personal_max_waypoints` / `global_max_waypoints` | 个人 / 公共传送点数量上限                             | `10` / `100`                                  |
-| `save_interval_seconds`                           | 自动保存间隔（0 = 关闭）                             | `120`                                         |
-| `offline_player_retention_days`                   | 下线位置保留天数（0 = 不过期）                          | `180`                                         |
-| `offline_player_max_entries`                      | 下线位置保留条数上限（0 = 不限）                         | `5000`                                        |
-| `back_on_death`                                   | 死亡时记录返回点                                   | `true`                                        |
-| `tpa_timeout_seconds`                             | TPA 请求超时                                   | `60`                                          |
-| `tpa_duplicate_policy`                            | 重复请求策略：`REJECT` / `REPLACE`                | `REJECT`                                      |
-| `confirm_timeout_seconds`                         | 安全确认超时                                     | `15`                                          |
-| `cooldown`                                        | 各传送类型冷却（秒）                                 | waypoint `5` / tp `10` / back `10` / rtp `60` |
-| `random_teleport`                                 | 随机传送开关、最小/最大半径、尝试次数、并发搜索数                  | 开启，500–5000                                   |
-| `cost`                                            | 传送花费（EXP/物品、跨世界模式与附加费）                     | 默认关闭                                          |
-| `safety_check`                                    | 安全检测（`CONFIRM` / `NEARBY_SAFE`、搜索范围、禁止水域等） | 开启                                            |
-| `commands.override_tp`                            | 用本模组 `/tp` 覆盖原版命令                          | `false`                                       |
+| 选项                                                         | 说明                                         | 默认                                            |
+|------------------------------------------------------------|--------------------------------------------|-----------------------------------------------|
+| `default_locale`                                           | 消息默认语言（`en_US` / `zh_CN`）                  | `en_US`                                       |
+| `worlds`                                                   | 允许传送的世界白名单（空 = 全部）                         | 三个主世界                                         |
+| `easy_tp`                                                  | 启用 `/rime <名称>` 简易传送                       | `true`                                        |
+| `allow_unicode_names`                                      | 传送点名称允许非 ASCII 字符                          | `false`                                       |
+| `waypoint_name_max_length`                                 | 传送点名称最大长度                                  | `24`                                          |
+| `personal_max_waypoints` / `global_max_waypoints`          | 个人 / 公共传送点数量上限                             | `10` / `100`                                  |
+| `save_interval_seconds`                                    | 自动保存间隔（0 = 关闭）                             | `120`                                         |
+| `offline_player_retention_days`                            | 下线位置保留天数（0 = 不过期）                          | `180`                                         |
+| `offline_player_max_entries`                               | 下线位置保留条数上限（0 = 不限）                         | `5000`                                        |
+| `back_on_death`                                            | 死亡时记录返回点                                   | `true`                                        |
+| `tpa_timeout_seconds`                                      | TPA 请求超时                                   | `60`                                          |
+| `tpa_duplicate_policy`                                     | 重复请求策略：`REJECT` / `REPLACE`                | `REJECT`                                      |
+| `tpa_request_cooldown_seconds`                             | 同一玩家对同一目标两次请求最短间隔（秒，0 = 关闭）                | `5`                                           |
+| `tpa_target_chat_limit` / `tpa_target_chat_window_seconds` | 目标玩家在窗口内最多收到的请求聊天消息数（0 = 不限）               | `5` / `10`                                    |
+| `confirm_timeout_seconds`                                  | 安全确认超时                                     | `15`                                          |
+| `cooldown`                                                 | 各传送类型冷却（秒）                                 | waypoint `5` / tp `10` / back `10` / rtp `60` |
+| `random_teleport`                                          | 随机传送开关、最小/最大半径、尝试次数、并发搜索数                  | 开启，500–5000                                   |
+| `cost`                                                     | 传送花费（EXP/物品、跨世界模式与附加费）                     | 默认关闭                                          |
+| `safety_check`                                             | 安全检测（`CONFIRM` / `NEARBY_SAFE`、搜索范围、禁止水域等） | 开启                                            |
+| `commands.override_tp`                                     | 用本模组 `/tp` 覆盖原版命令                          | `false`                                       |
 
 ### 消息与数据
 
@@ -223,6 +226,21 @@ RankBoard 不可用时自动禁用结算并在日志中提示。
 | `monthly-rank-awards` | 月排行授勋（`enabled` / `day` / `time` / `zone`） | 每月 1 日 00:05 Asia/Shanghai |
 
 旧版 `title.properties` 配置会在首次启动时自动迁移为 YAML。
+
+## 聊天模块
+
+内置聊天防刷屏：玩家在配置的统计窗口内发送超过阈值的消息时，会被**禁言**（默认，
+`mute_seconds` 后自动恢复）或**踢出**（`action: KICK`）。配置位于
+`config/rime-tools/chat.yml`：
+
+- `anti_spam.enabled`：开关，默认 `true`
+- `anti_spam.window_seconds`：统计窗口（秒），默认 `5`
+- `anti_spam.max_messages`：窗口内消息数上限，默认 `6`
+- `anti_spam.action`：`MUTE`（禁言，默认）或 `KICK`（踢出）
+- `anti_spam.mute_seconds`：禁言时长（秒），默认 `60`
+
+聊天发送者名称的前缀装饰由各模块注册到聊天模块统一处理（例如头衔模块把
+`[ 头衔 ]` 加到名字前）。
 
 ## 客户端功能（可选）
 

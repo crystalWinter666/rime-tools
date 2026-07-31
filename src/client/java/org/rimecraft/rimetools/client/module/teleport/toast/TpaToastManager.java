@@ -73,7 +73,7 @@ public final class TpaToastManager implements HudElement {
 
     private static int accentColor(ToastEntry toast) {
         return switch (toast.state) {
-            case ACCEPTED -> 0xFF4ADE80;
+            case ACCEPTED, AUTO -> 0xFF4ADE80;
             case DENIED -> 0xFFFB7185;
             case SENT -> 0xFF60A5FA;
             case INCOMING -> toast.type == 0 ? 0xFF38BDF8 : 0xFFFBBF24;
@@ -81,7 +81,7 @@ public final class TpaToastManager implements HudElement {
     }
 
     private static int exitTicks(ToastEntry toast) {
-        return toast.state == State.ACCEPTED || toast.state == State.DENIED
+        return toast.state == State.ACCEPTED || toast.state == State.DENIED || toast.state == State.AUTO
                 ? RESULT_EXIT_TICKS
                 : REQUEST_EXIT_TICKS;
     }
@@ -91,6 +91,7 @@ public final class TpaToastManager implements HudElement {
             case ACCEPTED -> "rime-tools.teleport.toast.accepted";
             case DENIED -> "rime-tools.teleport.toast.denied";
             case SENT -> "rime-tools.teleport.toast.sent";
+            case AUTO -> "rime-tools.teleport.toast.auto_accepted";
             case INCOMING -> toast.type == 0
                     ? "rime-tools.teleport.toast.wants_tp"
                     : "rime-tools.teleport.toast.wants_here";
@@ -102,6 +103,7 @@ public final class TpaToastManager implements HudElement {
             case ACCEPTED -> "rime-tools.teleport.toast.accepted_title";
             case DENIED -> "rime-tools.teleport.toast.denied_title";
             case SENT -> "rime-tools.teleport.toast.waiting";
+            case AUTO -> "rime-tools.teleport.toast.auto_title";
             case INCOMING -> "rime-tools.teleport.toast.incoming_title";
         };
     }
@@ -148,6 +150,13 @@ public final class TpaToastManager implements HudElement {
 
     public void addSent(String name, int type, int seconds) {
         replace(new ToastEntry(name, type, seconds, State.SENT));
+    }
+
+    /**
+     * Shows a short, button-less notice for an automatically accepted teleport.
+     */
+    public void addAutoAccepted(String name, int type) {
+        replace(new ToastEntry(name, type, 3, State.AUTO));
     }
 
     private void replace(ToastEntry entry) {
@@ -248,7 +257,7 @@ public final class TpaToastManager implements HudElement {
                     color(accent, visibility), false);
         }
 
-        int progressStart = toast.state == State.ACCEPTED || toast.state == State.DENIED
+        int progressStart = toast.state == State.ACCEPTED || toast.state == State.DENIED || toast.state == State.AUTO
                 ? toast.phaseStartedAt
                 : ENTER_TICKS;
         float remaining = toast.age <= progressStart ? 1.0f
@@ -261,7 +270,7 @@ public final class TpaToastManager implements HudElement {
         }
     }
 
-    enum State {INCOMING, SENT, ACCEPTED, DENIED}
+    enum State {INCOMING, SENT, ACCEPTED, DENIED, AUTO}
 
     public static final class ToastEntry {
         public final String name;

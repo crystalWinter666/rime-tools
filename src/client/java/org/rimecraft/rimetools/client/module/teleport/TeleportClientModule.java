@@ -64,8 +64,13 @@ public final class TeleportClientModule implements RimeClientModule {
         ClientPlayNetworking.registerGlobalReceiver(TpaToastPayload.TYPE,
                 (p, ctx) -> ctx.client().execute(() -> {
                     if (ClientConfig.get().showToast()) {
-                        if (p.sent()) toastManager.addSent(p.senderName(), p.requestType(), p.timeoutSeconds());
-                        else toastManager.addIncoming(p.senderName(), p.requestType(), p.timeoutSeconds());
+                        if (p.requestType() == TpaToastPayload.TYPE_AUTO) {
+                            toastManager.addAutoAccepted(p.senderName(), p.requestType());
+                        } else if (p.sent()) {
+                            toastManager.addSent(p.senderName(), p.requestType(), p.timeoutSeconds());
+                        } else {
+                            toastManager.addIncoming(p.senderName(), p.requestType(), p.timeoutSeconds());
+                        }
                     }
                 }));
 

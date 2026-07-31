@@ -11,9 +11,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class TpaManager {
     private final Map<String, TpaRequest> requests = new ConcurrentHashMap<>();
+    private final Map<String, Long> lastRequestAt = new ConcurrentHashMap<>();
+    private final Map<UUID, Deque<Long>> targetChatTimes = new ConcurrentHashMap<>();
 
     private String key(UUID sender, UUID target) {
         return sender + ":" + target;
+    }
+
+    /**
+     * Seconds remaining before the sender may request the same target again; 0 means allowed.
+     */
+    public synchronized long cooldownRemaining(UUID sender, UUID target, long now, int cooldownSeconds) {
+        if (cooldownSeconds <= 0) return 0;
+        Long last = lastRequestAt.get(key(sender, target));
+        if (last == null) return 0;
+        return Math.max(0, last + cooldownSeconds - now);
     }
 
     public synchronized TpaRequest get(UUID sender, UUID target) {
@@ -36,8 +48,22 @@ public final class TpaManager {
 
     public synchronized boolean add(TpaRequest request, TeleportConfig.DuplicatePolicy policy) {
         String key = key(request.senderId(), request.targetId());
+        lastRequestAt.put(key, request.createdAt());
         if (requests.containsKey(key) && policy == TeleportConfig.DuplicatePolicy.REJECT) return false;
         requests.put(key, request);
+        return true;
+    }
+
+    /**
+     * True when the target may still receive a request chat message within the
+     * rolling window (limit messages per windowSeconds). Always true when limit <= 0.
+     */
+    public synchronized boolean allowTargetChat(UUID target, long now, int limit, int windowSeconds) {
+        if (limit <= 0) return true;
+        Deque<Long> times = targetChatTimes.computeIfAbsent(target, ignored -> new ArrayDeque<>());
+        while (!times.isEmpty() && now - times.peekFirst() > windowSeconds) times.pollFirst();
+        if (times.size() >= limit) return false;
+        times.addLast(now);
         return true;
     }
 

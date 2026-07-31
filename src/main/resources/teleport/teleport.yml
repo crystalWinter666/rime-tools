@@ -31,6 +31,12 @@ back_on_death: true
 tpa_timeout_seconds: 60
 # TPA duplicate policy: REJECT or REPLACE.
 tpa_duplicate_policy: REJECT
+# Minimum seconds between two TPA requests from the same player to the same target (0 disables).
+tpa_request_cooldown_seconds: 5
+# Max TPA request chat messages shown to a target within the window below (0 disables).
+tpa_target_chat_limit: 5
+# Time window in seconds for the target chat limit above.
+tpa_target_chat_window_seconds: 10
 # Safety confirm timeout in seconds (clamped to 5-3600).
 confirm_timeout_seconds: 15
 

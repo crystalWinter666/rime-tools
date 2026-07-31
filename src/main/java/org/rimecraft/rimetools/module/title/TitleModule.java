@@ -3,10 +3,17 @@ package org.rimecraft.rimetools.module.title;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import org.rimecraft.rimetools.RimeTools;
 import org.rimecraft.rimetools.module.RimeModule;
 import org.rimecraft.rimetools.module.RimeModuleContext;
+import org.rimecraft.rimetools.module.chat.ChatNameDecoration;
+import org.rimecraft.rimetools.module.title.chat.TitleChatFormatter;
 import org.rimecraft.rimetools.module.title.command.TitleCommands;
 import org.rimecraft.rimetools.module.title.config.TitleConfig;
 import org.rimecraft.rimetools.module.title.integration.RankBoardAwardService;
@@ -14,12 +21,16 @@ import org.rimecraft.rimetools.module.title.network.TitleNetworking;
 import org.rimecraft.rimetools.module.title.permission.PermissionChecker;
 import org.rimecraft.rimetools.module.title.placeholder.TitlePlaceholders;
 import org.rimecraft.rimetools.module.title.storage.TitleRepository;
+import org.rimecraft.rimetools.module.title.title.TitleDefinition;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class TitleModule implements RimeModule {
     public static final String ID = "title";
+
+    private static final ResourceKey<ChatType> TITLE_CHAT = ResourceKey.create(
+            Registries.CHAT_TYPE, Identifier.fromNamespaceAndPath(RimeTools.MOD_ID, ID));
 
     private static TitleRepository repository;
     private static PermissionChecker permissionChecker = PermissionChecker.NONE;
@@ -70,6 +81,15 @@ public final class TitleModule implements RimeModule {
 
     @Override
     public void initialize(RimeModuleContext context) {
+        ChatNameDecoration.setChatType(TITLE_CHAT);
+        ChatNameDecoration.register((sender, name) -> {
+            TitleRepository current = repository;
+            if (current == null) return name;
+            Component title = current.findVisibleTitle(sender, permissionChecker)
+                    .map(TitleDefinition::asComponent)
+                    .orElseGet(current::fallbackComponent);
+            return TitleChatFormatter.decorateSender(title, name);
+        });
         TitleNetworking.register();
         TitlePlaceholders.register();
         if (isLuckPermsAvailable()) {
