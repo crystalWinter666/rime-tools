@@ -1,0 +1,106 @@
+# Default language for console and players without a matching locale.
+default_locale: en_US
+
+# Worlds whitelist. Empty list means all worlds allowed.
+worlds:
+  - world
+  - world_nether
+  - world_the_end
+
+# Enable easy teleport: /rime <name>
+easy_tp: true
+# Allow non-ASCII names for waypoints.
+allow_unicode_names: false
+# Maximum length for waypoint names.
+waypoint_name_max_length: 24
+# Per-player maximum number of personal waypoints.
+personal_max_waypoints: 10
+# Maximum number of global waypoints.
+global_max_waypoints: 100
+# Auto-save interval in seconds (0 to disable).
+save_interval_seconds: 120
+# Remove logout positions older than this many days (0 disables age pruning).
+offline_player_retention_days: 180
+# Maximum number of logout positions retained (0 disables the count limit).
+offline_player_max_entries: 5000
+# Maximum offline players included in teleport GUI responses (0 means unlimited).
+offline_player_list_limit: 1000
+# Record back point on death.
+back_on_death: true
+# TPA request timeout in seconds.
+tpa_timeout_seconds: 60
+# TPA duplicate policy: REJECT or REPLACE.
+tpa_duplicate_policy: REJECT
+# Safety confirm timeout in seconds (clamped to 5-3600).
+confirm_timeout_seconds: 15
+
+cooldown:
+  # Cooldown for waypoint teleport.
+  waypoint: 5
+  # Cooldown for tp/tpa.
+  tp: 10
+  # Cooldown for /back.
+  back: 10
+  # Cooldown for random teleport.
+  rtp: 60
+
+random_teleport:
+  # Enable /rtp, /tpr and /r.
+  enabled: true
+  # Minimum distance from the player's current position.
+  min_radius: 500
+  # Maximum distance from the player's current position.
+  max_radius: 5000
+  # Maximum number of asynchronously loaded candidate chunks per request.
+  max_attempts: 8
+  # Maximum number of random teleport searches running across the server.
+  max_concurrent_searches: 2
+
+cost:
+  # Rounding rule for distance-based cost.
+  rounding: CEIL
+  crossworld:
+    # FIXED_DISTANCE uses a fixed distance value; EXTRA_COST adds extra_cost.
+    mode: FIXED_DISTANCE
+    # Fixed distance value for cross-world cost.
+    distance: 1000
+    # Extra cost when mode is EXTRA_COST.
+    extra_cost: 5
+  exp:
+    # Enable EXP cost.
+    enabled: false
+    # Base EXP cost.
+    base: 5
+    # EXP cost per block.
+    per_block: 0.02
+  item:
+    # Enable item cost.
+    enabled: false
+    # Item material name.
+    material: DIAMOND
+    # Custom model data filter (-1 to ignore).
+    custom_model_data: -1
+    # Base item cost.
+    base: 1
+    # Item cost per block.
+    per_block: 0.01
+
+safety_check:
+  # Enable safety check before teleport.
+  enabled: true
+  # Mode: CONFIRM or NEARBY_SAFE.
+  mode: CONFIRM
+  # Horizontal radius for nearby safe search.
+  safety_search_radius: 8
+  # Vertical search range.
+  safety_search_vertical: 3
+  # If search fails: CONFIRM or DENY.
+  nearby_fallback: CONFIRM
+  # Treat water as unsafe.
+  disallow_water: true
+  # Minimum Y height considered safe.
+  min_y: -64
+
+commands:
+  # Whether to register /tp as a shortcut command.
+  override_tp: false

@@ -1,0 +1,155 @@
+prefix: "<gray>[<gradient:#6ec6ff:#a5ffd6>CA</gradient>]</gray> "
+
+help.header: |-
+  <gradient:#38bdf8:#7dd3fc>RIME Tools teleport module</gradient>
+  <gray>/rime setp|setg [-f] <name> [desc...]</gray>
+  <gray>/rime tpp|tpg <name></gray>
+  <gray>/rime delp|delg <name></gray>
+  <gray>/rime list|listp|listg</gray>
+  <gray>/rime descp|descg <name> <desc...></gray>
+  <gray>/rime gui</gray>
+  <gray>/rime manage <player> (管理员)</gray>
+  <gray>/rime tp|tphere <player></gray>
+  <gray>/rime tpa|tpahere <player></gray>
+  <gray>/rime accept|deny [player]</gray>
+  <gray>/rime tpaallow|tpadisallow <player></gray>
+  <gray>/rime tpaallowlist</gray>
+  <gray>/rime back</gray>
+  <gray>/rime last <玩家> (权限)</gray>
+  <gray>/rime tpother <玩家> <私人传送点> (权限)</gray>
+  <gray>/rtp | /tpr | /r</gray>
+  <gray>/rime reload</gray>
+  <gray>/rime importstp [file] [--include-back] [--offline-uuid|--raw-uuid|--auto-uuid] [--clear]</gray>
+
+player_only: "<red>该命令只能由玩家使用。</red>"
+no_permission: "<red>你没有权限。</red>"
+reload.success: "<green>配置、语言和传送数据已重载。</green>"
+reload.failed: "<red>重载失败，当前在线数据保持不变；请检查控制台中的文件解析错误。</red>"
+
+world.not_allowed: "<red>当前世界禁止传送。</red>"
+world.not_allowed_target: "<red>目标世界 <white><world></white> 不允许传送。</red>"
+world.crossworld_denied: "<red>你没有跨世界传送权限。</red>"
+world.missing: "<red>世界 <white><world></white> 不存在。</red>"
+
+usage.set: "<yellow>用法: /rime setp|setg [-f] <name> [desc...]</yellow>"
+usage.tp_waypoint: "<yellow>用法: /rime tpp|tpg <name></yellow>"
+usage.del: "<yellow>用法: /rime delp|delg <name></yellow>"
+usage.desc: "<yellow>用法: /rime descp|descg <name> <desc...></yellow>"
+usage.tp_player: "<yellow>用法: /rime tp|tphere <player></yellow>"
+usage.tpa: "<yellow>用法: /rime tpa|tpahere <player></yellow>"
+usage.tpaallow: "<yellow>用法: /rime tpaallow <player></yellow>"
+usage.tpadisallow: "<yellow>用法: /rime tpadisallow <player></yellow>"
+usage.importstp: "<yellow>用法: /rime importstp [file] [--include-back] [--offline-uuid|--raw-uuid|--auto-uuid] [--clear]</yellow>"
+usage.manage: "<yellow>用法: /rime manage <玩家名></yellow>"
+usage.last: "<yellow>用法: /rime last <玩家名或 UUID></yellow>"
+usage.tpother: "<yellow>用法: /rime tpother <玩家名或 UUID> <私人传送点></yellow>"
+
+importstp.start: "<gray>正在导入 STP 数据: <white><file></white>...</gray>"
+importstp.done: "<green>导入完成: 玩家 <white><players></white>，个人点 <white><personal></white>，全局点 <white><global></white>，跳过 <white><skipped></white>。</green>"
+importstp.missing: "<red>找不到文件 <white><file></white>。</red>"
+importstp.failed: "<red>导入失败: <white><error></white></red>"
+importstp.warnings: "<yellow>导入完成，但有 <white><count></white> 条警告，详情请查看控制台。</yellow>"
+
+waypoint.invalid_name: "<red>名称不合法，长度上限: <white><max></white>。</red>"
+waypoint.limit: "<red>传送点数量已达上限 (<white><max></white>)。</red>"
+waypoint.exists: "<red>传送点已存在，可用 -f 覆盖。</red>"
+waypoint.created: "<green>已创建传送点 <white><name></white>。</green>"
+waypoint.updated: "<yellow>已更新传送点 <white><name></white>。</yellow>"
+waypoint.deleted: "<green>已删除传送点 <white><name></white>。</green>"
+waypoint.not_found: "<red>未找到传送点 <white><name></white>。</red>"
+waypoint.desc_updated: "<green>已更新 <white><name></white> 的描述。</green>"
+waypoint.details_updated: "<green>已更新传送点 <white><name></white> 的信息。</green>"
+waypoint.not_owner: "<red>你不是传送点 <white><name></white> 的所有者。</red>"
+
+fakeplayer.not_found: "<red>假人 <white><name></white> 已不在线。</red>"
+fakeplayer.not_creator: "<red>你只能传送到由自己创建的假人。</red>"
+fakeplayer.teleport_success: "<green>已传送到假人 <white><name></white>。</green>"
+
+list.header: "<gradient:#b5e8ff:#d7fff1>传送点列表</gradient><gray>:</gray>"
+list.personal: "<noprefix><gray>个人 (<white><count></white>):</gray>"
+list.global: "<noprefix><gray>全局 (<white><count></white>):</gray>"
+list.entry: "<noprefix><gray>-</gray> <aqua><name></aqua> <dark_gray>(<world> <x>,<y>,<z> yaw <yaw> pitch <pitch>)</dark_gray> <gray>描述:</gray> <white><desc></white> <teleport> <delete> <edit>"
+list.button.teleport:
+  label: "<noprefix><gradient:#8ef6b2:#b7ffd9>[传送]</gradient>"
+  hover: "<noprefix><gray>点击传送</gray>"
+list.button.delete:
+  label: "<noprefix><gradient:#ffb3b3:#ffd7d7>[删除]</gradient>"
+  hover: "<noprefix><gray>点击删除</gray>"
+list.button.desc:
+  label: "<noprefix><gradient:#ffe29a:#fff3c1>[编辑描述]</gradient>"
+  hover: "<noprefix><gray>点击编辑描述</gray>"
+
+teleport.success_waypoint: "<green>已传送到 <white><name></white>。</green>"
+teleport.failed: "<red>传送失败。</red>"
+
+cooldown.wait: "<red>冷却中: 剩余 <white><time></white>。</red>"
+cost.not_enough: "<red>消耗不足，需要经验: <white><exp></white>，物品: <white><items></white>。</red>"
+
+safety.moved: "<yellow>目标不安全，已改为附近安全位置。</yellow>"
+safety.denied: "<red>目标不安全，已取消传送。</red>"
+safety.confirm: "<red>目标不安全: <white><reason></white></red> <confirm> <cancel>"
+safety.button.confirm: "<noprefix><gradient:#8ef6b2:#b7ffd9><click:run_command:'/rime confirm'>[确认传送]</click></gradient>"
+safety.button.cancel: "<noprefix><gradient:#ffb3b3:#ffd7d7><click:run_command:'/rime cancelconfirm'>[取消]</click></gradient>"
+safety.reason.void: "虚空或高度过低"
+safety.reason.blocked: "空间不足"
+safety.reason.no_floor: "没有安全落脚点"
+safety.reason.danger: "危险方块"
+safety.reason.water: "在水中"
+safety.reason.invalid_world: "世界不可用"
+
+confirm.none: "<red>没有待确认的传送。</red>"
+confirm.success: "<green>已确认传送。</green>"
+confirm.cancelled: "<yellow>已取消确认。</yellow>"
+confirm.timeout: "<red>确认超时。</red>"
+
+back.saved: "<gray>已记录返回点。</gray> <button>"
+back.button: "<noprefix><gradient:#8fd1ff:#b9f1ff><click:run_command:'/rime back'>[返回]</click></gradient>"
+back.none: "<red>没有可返回的位置。</red>"
+back.success: "<green>已返回上一个位置。</green>"
+
+last.not_found: "<red>没有记录玩家 <white><player></white> 的下线位置。</red>"
+last.success: "<green>已传送到 <white><player></white> 下线前的位置。</green>"
+tpother.not_found: "<red>玩家 <white><player></white> 没有名为 <white><name></white> 的私人传送点。</red>"
+tpother.success: "<green>已传送到 <white><player></white> 的私人传送点 <white><name></white>。</green>"
+
+rtp.searching: "<gray>正在异步搜索安全的随机位置...</gray>"
+rtp.success: "<green>已随机传送到 <white><x>, <y>, <z></white>。</green>"
+rtp.failed: "<red>未找到安全的随机位置，请稍后重试。</red>"
+rtp.pending: "<yellow>已有一个随机传送搜索正在进行。</yellow>"
+rtp.busy: "<yellow>服务器正在处理过多随机传送请求，请稍后重试。</yellow>"
+rtp.disabled: "<red>随机传送已关闭。</red>"
+
+player.not_found: "<red>未找到玩家 <white><player></white>。</red>"
+
+tp.success: "<green>已传送到 <white><player></white>。</green>"
+tphere.success: "<green>已将 <white><player></white> 传送到你身边。</green>"
+
+tpa.self: "<red>不能向自己发送请求。</red>"
+tpa.duplicate: "<red>你已向该玩家发送过请求。</red>"
+tpa.request.to_target: "<noprefix><bold><gradient:#ff9a44:#ffe259>========================================</gradient><newline><gradient:#6ec6ff:#a5ffd6>  <player></gradient> <gold>请求传送到你这里！</gold><newline>  <accept>  <deny><newline><gradient:#ff9a44:#ffe259>========================================</gradient></bold>"
+tpa.request.here: "<noprefix><bold><gradient:#ff9a44:#ffe259>========================================</gradient><newline><gradient:#6ec6ff:#a5ffd6>  <player></gradient> <gold>请求你传送到他那里！</gold><newline>  <accept>  <deny><newline><gradient:#ff9a44:#ffe259>========================================</gradient></bold>"
+tpa.sent: "<gray>已向 <white><player></white> 发送请求。</gray>"
+tpa.auto.sent: "<green><white><player></white> 允许你直接传送，已传送。</green>"
+tpa.auto.received: "<gray><white><player></white> 已直接传送到你身边。</gray>"
+tpa.cancelled: "<yellow>已取消待处理请求。</yellow>"
+tpa.cancelled_target: "<yellow><player></yellow> 已取消请求。</yellow>"
+tpa.none: "<red>没有待处理请求。</red>"
+tpa.accepted: "<green>已接受来自 <white><player></white> 的请求。</green>"
+tpa.accepted_sender: "<green><white><player></white> 已接受你的请求。</green>"
+tpa.denied: "<red><white><player></white> 拒绝了你的请求。</red>"
+tpa.denied_target: "<yellow>已拒绝来自 <white><player></white> 的请求。</yellow>"
+tpa.timeout.sender: "<red>你对 <white><player></white> 的请求已过期。</red>"
+tpa.timeout.target: "<red>来自 <white><player></white> 的请求已过期。</red>"
+tpa.accept:
+  label: "<noprefix><gradient:#8ef6b2:#b7ffd9>[接受]</gradient>"
+  hover: "<noprefix><gray>接受请求</gray>"
+tpa.deny:
+  label: "<noprefix><gradient:#ffb3b3:#ffd7d7>[拒绝]</gradient>"
+  hover: "<noprefix><gray>拒绝请求</gray>"
+
+tpa.allow.added: "<green>已允许 <white><player></white> 直接传送到你身边。</green>"
+tpa.allow.exists: "<yellow><white><player></white> 已在允许列表中。</yellow>"
+tpa.allow.removed: "<green>已移除 <white><player></white> 的直接传送权限。</green>"
+tpa.allow.not_found: "<yellow><white><player></white> 不在允许列表中。</yellow>"
+tpa.allow.list: "<gray>允许直接传送的玩家: <white><list></white></gray>"
+tpa.allow.list_empty: "<gray>允许列表为空。</gray>"

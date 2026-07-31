@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "rime-tools",
+  "version": "${version}",
+  "name": "RIME 雾凇 服务器工具",
+  "description": "Modular teleport and player title tools for Fabric servers.",
+  "authors": ["QianMo0721"],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "org.rimecraft.rimetools.client.RimeToolsClient"
+    ],
+    "main": [
+      "org.rimecraft.rimetools.RimeTools"
+    ],
+    "modmenu": [
+      "org.rimecraft.rimetools.client.module.title.RimeToolsModMenu"
+    ]
+  },
+  "mixins": [
+    "rime-tools.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
+    "placeholder-api": ">=3.1.0-beta.1",
+    "java": ">=25"
+  },
+  "suggests": {
+    "luckperms": "*",
+    "rankboard": "*",
+    "modmenu": "*",
+    "carpetperm": "*"
+  }
+}

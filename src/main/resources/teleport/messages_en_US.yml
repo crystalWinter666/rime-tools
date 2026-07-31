@@ -1,0 +1,155 @@
+prefix: "<gray>[<gradient:#6ec6ff:#a5ffd6>CA</gradient>]</gray> "
+
+help.header: |-
+  <gradient:#38bdf8:#7dd3fc>RIME Tools teleport module</gradient>
+  <gray>/rime setp|setg [-f] <name> [desc...]</gray>
+  <gray>/rime tpp|tpg <name></gray>
+  <gray>/rime delp|delg <name></gray>
+  <gray>/rime list|listp|listg</gray>
+  <gray>/rime descp|descg <name> <desc...></gray>
+  <gray>/rime gui</gray>
+  <gray>/rime manage <player> (admin)</gray>
+  <gray>/rime tp|tphere <player></gray>
+  <gray>/rime tpa|tpahere <player></gray>
+  <gray>/rime accept|deny [player]</gray>
+  <gray>/rime tpaallow|tpadisallow <player></gray>
+  <gray>/rime tpaallowlist</gray>
+  <gray>/rime back</gray>
+  <gray>/rime last <player> (permission)</gray>
+  <gray>/rime tpother <player> <private waypoint> (permission)</gray>
+  <gray>/rtp | /tpr | /r</gray>
+  <gray>/rime reload</gray>
+  <gray>/rime importstp [file] [--include-back] [--offline-uuid|--raw-uuid|--auto-uuid] [--clear]</gray>
+
+player_only: "<red>This command is player-only.</red>"
+no_permission: "<red>You don't have permission.</red>"
+reload.success: "<green>Configuration, messages, and teleport data reloaded.</green>"
+reload.failed: "<red>Reload failed. Current online data was preserved; check the console for file parsing errors.</red>"
+
+world.not_allowed: "<red>Teleport is disabled in this world.</red>"
+world.not_allowed_target: "<red>Destination world <white><world></white> is not allowed.</red>"
+world.crossworld_denied: "<red>You don't have cross-world permission.</red>"
+world.missing: "<red>World <white><world></white> not found.</red>"
+
+usage.set: "<yellow>Usage: /rime setp|setg [-f] <name> [desc...]</yellow>"
+usage.tp_waypoint: "<yellow>Usage: /rime tpp|tpg <name></yellow>"
+usage.del: "<yellow>Usage: /rime delp|delg <name></yellow>"
+usage.desc: "<yellow>Usage: /rime descp|descg <name> <desc...></yellow>"
+usage.tp_player: "<yellow>Usage: /rime tp|tphere <player></yellow>"
+usage.tpa: "<yellow>Usage: /rime tpa|tpahere <player></yellow>"
+usage.tpaallow: "<yellow>Usage: /rime tpaallow <player></yellow>"
+usage.tpadisallow: "<yellow>Usage: /rime tpadisallow <player></yellow>"
+usage.importstp: "<yellow>Usage: /rime importstp [file] [--include-back] [--offline-uuid|--raw-uuid|--auto-uuid] [--clear]</yellow>"
+usage.manage: "<yellow>Usage: /rime manage <player></yellow>"
+usage.last: "<yellow>Usage: /rime last <player name or UUID></yellow>"
+usage.tpother: "<yellow>Usage: /rime tpother <player name or UUID> <private waypoint></yellow>"
+
+importstp.start: "<gray>Importing STP data: <white><file></white>...</gray>"
+importstp.done: "<green>Import complete: players <white><players></white>, personal <white><personal></white>, global <white><global></white>, skipped <white><skipped></white>.</green>"
+importstp.missing: "<red>File not found: <white><file></white>.</red>"
+importstp.failed: "<red>Import failed: <white><error></white></red>"
+importstp.warnings: "<yellow>Import completed with <white><count></white> warnings. Check console for details.</yellow>"
+
+waypoint.invalid_name: "<red>Invalid name. Max length: <white><max></white>.</red>"
+waypoint.limit: "<red>Waypoint limit reached (<white><max></white>).</red>"
+waypoint.exists: "<red>Waypoint exists. Use -f to overwrite.</red>"
+waypoint.created: "<green>Waypoint <white><name></white> created.</green>"
+waypoint.updated: "<yellow>Waypoint <white><name></white> updated.</yellow>"
+waypoint.deleted: "<green>Waypoint <white><name></white> deleted.</green>"
+waypoint.not_found: "<red>Waypoint <white><name></white> not found.</red>"
+waypoint.desc_updated: "<green>Description updated for <white><name></white>.</green>"
+waypoint.details_updated: "<green>Waypoint <white><name></white> details updated.</green>"
+waypoint.not_owner: "<red>You don't own waypoint <white><name></white>.</red>"
+
+fakeplayer.not_found: "<red>Fake player <white><name></white> is no longer online.</red>"
+fakeplayer.not_creator: "<red>You can only teleport to fake players you created.</red>"
+fakeplayer.teleport_success: "<green>Teleported to fake player <white><name></white>.</green>"
+
+list.header: "<gradient:#b5e8ff:#d7fff1>Waypoints</gradient><gray>:</gray>"
+list.personal: "<noprefix><gray>Personal (<white><count></white>):</gray>"
+list.global: "<noprefix><gray>Global (<white><count></white>):</gray>"
+list.entry: "<noprefix><gray>-</gray> <aqua><name></aqua> <dark_gray>(<world> <x>,<y>,<z> yaw <yaw> pitch <pitch>)</dark_gray> <gray>Desc:</gray> <white><desc></white> <teleport> <delete> <edit>"
+list.button.teleport:
+  label: "<noprefix><gradient:#8ef6b2:#b7ffd9>[Teleport]</gradient>"
+  hover: "<noprefix><gray>Click to teleport</gray>"
+list.button.delete:
+  label: "<noprefix><gradient:#ffb3b3:#ffd7d7>[Delete]</gradient>"
+  hover: "<noprefix><gray>Click to delete</gray>"
+list.button.desc:
+  label: "<noprefix><gradient:#ffe29a:#fff3c1>[Edit Desc]</gradient>"
+  hover: "<noprefix><gray>Click to edit description</gray>"
+
+teleport.success_waypoint: "<green>Teleported to <white><name></white>.</green>"
+teleport.failed: "<red>Teleport failed.</red>"
+
+cooldown.wait: "<red>Cooldown: <white><time></white> remaining.</red>"
+cost.not_enough: "<red>Not enough cost. Need exp: <white><exp></white>, items: <white><items></white>.</red>"
+
+safety.moved: "<yellow>Unsafe location, moved to nearest safe spot.</yellow>"
+safety.denied: "<red>Unsafe location, teleport cancelled.</red>"
+safety.confirm: "<red>Unsafe location: <white><reason></white></red> <confirm> <cancel>"
+safety.button.confirm: "<noprefix><gradient:#8ef6b2:#b7ffd9><click:run_command:'/rime confirm'>[Confirm]</click></gradient>"
+safety.button.cancel: "<noprefix><gradient:#ffb3b3:#ffd7d7><click:run_command:'/rime cancelconfirm'>[Cancel]</click></gradient>"
+safety.reason.void: "Void or too low"
+safety.reason.blocked: "Not enough space"
+safety.reason.no_floor: "No safe floor"
+safety.reason.danger: "Dangerous block"
+safety.reason.water: "In water"
+safety.reason.invalid_world: "Invalid world"
+
+confirm.none: "<red>No pending confirmation.</red>"
+confirm.success: "<green>Teleport confirmed.</green>"
+confirm.cancelled: "<yellow>Confirmation cancelled.</yellow>"
+confirm.timeout: "<red>Confirmation timed out.</red>"
+
+back.saved: "<gray>Back point saved.</gray> <button>"
+back.button: "<noprefix><gradient:#8fd1ff:#b9f1ff><click:run_command:'/rime back'>[Back]</click></gradient>"
+back.none: "<red>No back location.</red>"
+back.success: "<green>Returned to back location.</green>"
+
+last.not_found: "<red>No logout position was recorded for <white><player></white>.</red>"
+last.success: "<green>Teleported to <white><player></white>'s logout position.</green>"
+tpother.not_found: "<red>Player <white><player></white> has no private waypoint named <white><name></white>.</red>"
+tpother.success: "<green>Teleported to <white><player></white>'s private waypoint <white><name></white>.</green>"
+
+rtp.searching: "<gray>Searching for a safe random location...</gray>"
+rtp.success: "<green>Randomly teleported to <white><x>, <y>, <z></white>.</green>"
+rtp.failed: "<red>No safe random location was found. Try again later.</red>"
+rtp.pending: "<yellow>A random teleport search is already running.</yellow>"
+rtp.busy: "<yellow>The server is handling too many random teleport searches. Try again shortly.</yellow>"
+rtp.disabled: "<red>Random teleport is disabled.</red>"
+
+player.not_found: "<red>Player <white><player></white> not found.</red>"
+
+tp.success: "<green>Teleported to <white><player></white>.</green>"
+tphere.success: "<green>Teleported <white><player></white> to you.</green>"
+
+tpa.self: "<red>You cannot send a request to yourself.</red>"
+tpa.duplicate: "<red>You already have a pending request to that player.</red>"
+tpa.request.to_target: "<noprefix><bold><gradient:#ff9a44:#ffe259>========================================</gradient><newline><gradient:#6ec6ff:#a5ffd6>  <player></gradient> <gold>wants to teleport to you!</gold><newline>  <accept>  <deny><newline><gradient:#ff9a44:#ffe259>========================================</gradient></bold>"
+tpa.request.here: "<noprefix><bold><gradient:#ff9a44:#ffe259>========================================</gradient><newline><gradient:#6ec6ff:#a5ffd6>  <player></gradient> <gold>wants you to teleport to them!</gold><newline>  <accept>  <deny><newline><gradient:#ff9a44:#ffe259>========================================</gradient></bold>"
+tpa.sent: "<gray>Request sent to <white><player></white>.</gray>"
+tpa.auto.sent: "<green><white><player></white> allows direct teleport. Teleported.</green>"
+tpa.auto.received: "<gray><white><player></white> teleported to you directly.</gray>"
+tpa.cancelled: "<yellow>Cancelled pending requests.</yellow>"
+tpa.cancelled_target: "<yellow><player></yellow> cancelled the request.</yellow>"
+tpa.none: "<red>No pending requests.</red>"
+tpa.accepted: "<green>Accepted request from <white><player></white>.</green>"
+tpa.accepted_sender: "<green>Your request was accepted by <white><player></white>.</green>"
+tpa.denied: "<red>Your request was denied by <white><player></white>.</red>"
+tpa.denied_target: "<yellow>Denied request from <white><player></white>.</yellow>"
+tpa.timeout.sender: "<red>Your request to <white><player></white> expired.</red>"
+tpa.timeout.target: "<red>Request from <white><player></white> expired.</red>"
+tpa.accept:
+  label: "<noprefix><gradient:#8ef6b2:#b7ffd9>[Accept]</gradient>"
+  hover: "<noprefix><gray>Accept request</gray>"
+tpa.deny:
+  label: "<noprefix><gradient:#ffb3b3:#ffd7d7>[Deny]</gradient>"
+  hover: "<noprefix><gray>Deny request</gray>"
+
+tpa.allow.added: "<green>Allowed <white><player></white> to teleport to you directly.</green>"
+tpa.allow.exists: "<yellow><white><player></white> is already in the allowlist.</yellow>"
+tpa.allow.removed: "<green>Removed direct-teleport permission for <white><player></white>.</green>"
+tpa.allow.not_found: "<yellow><white><player></white> is not in the allowlist.</yellow>"
+tpa.allow.list: "<gray>Direct-teleport allowlist: <white><list></white></gray>"
+tpa.allow.list_empty: "<gray>Allowlist is empty.</gray>"
