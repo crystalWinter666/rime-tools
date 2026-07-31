@@ -32,6 +32,10 @@
     },
     {
       "config": "rime-tools-chat.mixins.json"
+    },
+    {
+      "config": "rime-tools-punishment.mixins.json",
+      "environment": "server"
     }
   ],
   "depends": {

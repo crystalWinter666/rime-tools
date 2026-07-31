@@ -8,6 +8,7 @@ import org.rimecraft.rimetools.module.RimeModuleContext;
 import org.rimecraft.rimetools.module.chat.config.ChatConfig;
 import org.rimecraft.rimetools.module.chat.manager.ChatMuteManager;
 import org.rimecraft.rimetools.module.chat.manager.ChatSpamTracker;
+import org.rimecraft.rimetools.module.punishment.PunishmentModule;
 
 import java.nio.file.Path;
 import java.util.UUID;
@@ -60,6 +61,16 @@ public final class ChatModule implements RimeModule {
      */
     public boolean handleChatMessage(ServerPlayer player, long now) {
         UUID playerId = player.getUUID();
+        PunishmentModule punishment = PunishmentModule.INSTANCE;
+        if (punishment != null) {
+            long remaining = punishment.activeMute(playerId)
+                    .map(mute -> Math.max(0, mute.expiresAt() - now))
+                    .orElse(0L);
+            if (remaining > 0) {
+                punishment.notifyMuted(player, remaining);
+                return true;
+            }
+        }
         if (mutes.isMuted(playerId, now)) {
             player.sendSystemMessage(Component.translatable(
                     "rime-tools.chat.muted", mutes.remainingSeconds(playerId, now)));

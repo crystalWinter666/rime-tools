@@ -1,5 +1,6 @@
 package org.rimecraft.rimetools.module.teleport.repository;
 
+import org.rimecraft.rimetools.util.AtomicFileWriter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;

@@ -1,15 +1,16 @@
-package org.rimecraft.rimetools.module.teleport.repository;
+package org.rimecraft.rimetools.util;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-final class AtomicFileWriter {
+/** Writes text files atomically via a sibling temp file. */
+public final class AtomicFileWriter {
     private AtomicFileWriter() {
     }
 
-    static void write(Path file, String content) throws Exception {
+    public static void write(Path file, String content) throws Exception {
         Files.createDirectories(file.getParent());
         Path temporary = file.resolveSibling(file.getFileName() + ".tmp");
         try {
