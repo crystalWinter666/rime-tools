@@ -15,15 +15,12 @@ import org.rimecraft.rimetools.module.teleport.util.NameValidator;
 import org.rimecraft.rimetools.module.teleport.util.Permissions;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public final class TeleportNetworking {
 
-    private TeleportNetworking() { }
+    private TeleportNetworking() {
+    }
 
     public static void registerPayloads() {
         PayloadTypeRegistry.clientboundPlay().register(OpenWaypointScreenPayload.TYPE, OpenWaypointScreenPayload.STREAM_CODEC);
@@ -90,7 +87,7 @@ public final class TeleportNetworking {
     }
 
     private static void handleTeleport(TeleportModule mod, ServerPlayer player,
-                                        WaypointActionPayload payload, UUID ownerUuid) {
+                                       WaypointActionPayload payload, UUID ownerUuid) {
         if (payload.waypointName() == null) {
             refreshScreen(mod, player, payload);
             return;
@@ -113,7 +110,7 @@ public final class TeleportNetworking {
     }
 
     private static void handleDelete(TeleportModule mod, ServerPlayer player,
-                                      WaypointActionPayload payload, UUID ownerUuid, boolean isAdmin) {
+                                     WaypointActionPayload payload, UUID ownerUuid, boolean isAdmin) {
         if (payload.waypointName() == null) {
             refreshScreen(mod, player, payload);
             return;
@@ -176,7 +173,7 @@ public final class TeleportNetworking {
     }
 
     private static void handleCreate(TeleportModule mod, ServerPlayer player,
-                                      WaypointActionPayload payload, UUID ownerUuid) {
+                                     WaypointActionPayload payload, UUID ownerUuid) {
         if (payload.waypointName() == null) {
             refreshScreen(mod, player, payload);
             return;
@@ -275,7 +272,7 @@ public final class TeleportNetworking {
         }
         int mode = isAdmin ? WaypointActionPayload.MODE_ADMIN
                 : isOtherReadOnly ? WaypointActionPayload.MODE_OTHER_READ_ONLY
-                : WaypointActionPayload.MODE_OWN;
+                  : WaypointActionPayload.MODE_OWN;
         sendWaypointScreen(mod, player, mode,
                 isAdmin || isOtherReadOnly ? payload.targetUuid() : null, targetName);
     }
@@ -316,7 +313,7 @@ public final class TeleportNetworking {
                 .thenComparing(TeleportPlayerTarget::name, String.CASE_INSENSITIVE_ORDER));
         int acceptedMode = isAdmin ? WaypointActionPayload.MODE_ADMIN
                 : isOtherReadOnly ? WaypointActionPayload.MODE_OTHER_READ_ONLY
-                : WaypointActionPayload.MODE_OWN;
+                  : WaypointActionPayload.MODE_OWN;
         ServerPlayNetworking.send(player, new OpenWaypointScreenPayload(
                 acceptedMode,
                 isAdmin || isOtherReadOnly ? targetUuid : null,

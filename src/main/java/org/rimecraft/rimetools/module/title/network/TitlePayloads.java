@@ -11,6 +11,13 @@ import java.util.List;
 public final class TitlePayloads {
     public static final int PROTOCOL_VERSION = 2;
 
+    private TitlePayloads() {
+    }
+
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(RimeTools.MOD_ID, path);
+    }
+
     public record RequestTitles(int protocolVersion) implements CustomPacketPayload {
         public static final Type<RequestTitles> TYPE = new Type<>(id("request_titles"));
         public static final StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, RequestTitles> CODEC =
@@ -163,12 +170,5 @@ public final class TitlePayloads {
         public Type<? extends CustomPacketPayload> type() {
             return TYPE;
         }
-    }
-
-    private TitlePayloads() {
-    }
-
-    private static Identifier id(String path) {
-        return Identifier.fromNamespaceAndPath(RimeTools.MOD_ID, path);
     }
 }

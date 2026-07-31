@@ -10,11 +10,7 @@ import org.rimecraft.rimetools.RimeTools;
 import org.rimecraft.rimetools.module.title.title.TitleDefinition;
 import org.rimecraft.rimetools.module.title.title.TitleSelection;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 public final class TitleState extends SavedData {
     public static final Codec<TitleState> CODEC = RecordCodecBuilder.create(instance -> instance.group(

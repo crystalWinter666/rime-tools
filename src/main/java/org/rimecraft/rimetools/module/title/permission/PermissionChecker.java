@@ -23,7 +23,7 @@ public interface PermissionChecker {
     }
 
     default CompletableFuture<Boolean> replaceManagedGrants(Set<String> titleIds,
-                                                             Map<UUID, Set<String>> grants) {
+                                                            Map<UUID, Set<String>> grants) {
         return CompletableFuture.completedFuture(false);
     }
 

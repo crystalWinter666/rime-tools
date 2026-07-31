@@ -10,7 +10,8 @@ import org.rimecraft.rimetools.RimeTools;
 public final class Permissions {
     private static final Identifier ADMIN = id("admin");
 
-    private Permissions() { }
+    private Permissions() {
+    }
 
     public static boolean has(ServerPlayer player, String node, boolean publicDefault) {
         PermissionContextOwner owner = (PermissionContextOwner) (Object) player;

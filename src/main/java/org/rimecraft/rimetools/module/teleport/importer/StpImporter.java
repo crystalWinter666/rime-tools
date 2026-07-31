@@ -14,14 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class StpImporter {
     private static final Map<String, String> VANILLA_DIMENSION_WORLD = Map.of(
@@ -30,7 +23,8 @@ public final class StpImporter {
             "minecraft:the_end", "world_the_end"
     );
 
-    private StpImporter() { }
+    private StpImporter() {
+    }
 
     public static Result load(MinecraftServer server, Path file, UuidMode uuidMode, boolean includeBack,
                               Map<String, String> uuidMap, Map<String, String> worldMap) throws IOException {
@@ -203,9 +197,10 @@ public final class StpImporter {
         return element != null && element.isJsonArray() ? element.getAsJsonArray() : new JsonArray();
     }
 
-    public enum UuidMode { BUKKIT, OFFLINE, RAW, AUTO }
+    public enum UuidMode {BUKKIT, OFFLINE, RAW, AUTO}
 
     public record Result(Map<String, Map<String, Waypoint>> personal, Map<String, Waypoint> global,
                          int personalPlayers, int personalWaypoints, int globalWaypoints, int skipped,
-                         List<String> warnings, Set<String> dimensions) { }
+                         List<String> warnings, Set<String> dimensions) {
+    }
 }

@@ -46,5 +46,6 @@ public final class ConfirmManager {
     }
 
     public record PendingTeleport(UUID playerId, TeleportPosition destination, TeleportType type,
-                                  long expiresAtMillis) { }
+                                  long expiresAtMillis) {
+    }
 }

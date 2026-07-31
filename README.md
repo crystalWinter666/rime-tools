@@ -61,12 +61,12 @@ README 由 AI 生成。
 
 ### 配置文件（首次启动自动迁移）
 
-| 旧路径 | 新路径 | 迁移方式 |
-| --- | --- | --- |
-| `config/rime-tools/teleport/config.yml` | `config/rime-tools/teleport.yml` | 自动复制（内容为 YAML，键名不变） |
-| `config/rime-tools/title.properties` | `config/rime-tools/title.yml` | 自动转换（properties → YAML，键名从 `weekly-rank-awards-enabled` 变为 `weekly-rank-awards.enabled`） |
-| `config/rime-tools/teleport/`（传送点等数据文件） | 不变 | 无需迁移 |
-| `config/rime-tools/teleport-client.json` | 不变 | 无需迁移 |
+| 旧路径                                      | 新路径                              | 迁移方式                                                                                     |
+|------------------------------------------|----------------------------------|------------------------------------------------------------------------------------------|
+| `config/rime-tools/teleport/config.yml`  | `config/rime-tools/teleport.yml` | 自动复制（内容为 YAML，键名不变）                                                                      |
+| `config/rime-tools/title.properties`     | `config/rime-tools/title.yml`    | 自动转换（properties → YAML，键名从 `weekly-rank-awards-enabled` 变为 `weekly-rank-awards.enabled`） |
+| `config/rime-tools/teleport/`（传送点等数据文件）  | 不变                               | 无需迁移                                                                                     |
+| `config/rime-tools/teleport-client.json` | 不变                               | 无需迁移                                                                                     |
 
 自动迁移只在旧文件存在、新文件不存在时发生一次；迁移后旧文件保留作备份。
 如需手动迁移（例如自动迁移失败时）：
@@ -129,51 +129,51 @@ README 由 AI 生成。
 
 ### 传送点
 
-| 命令 | 说明 |
-| --- | --- |
-| `/rime setp [-f] <名称> [描述]` | 在当前位置创建私人传送点；`-f` 覆盖同名点。别名：`setpersonal`。 |
-| `/rime setg [-f] <名称> [描述]` | 在当前位置创建公共传送点；`-f` 覆盖同名点。别名：`setglobal`。 |
-| `/rime tpp <名称>` | 传送到自己的私人传送点。别名：`tpersonal`。 |
-| `/rime tpg <名称>` | 传送到公共传送点。别名：`tglobal`。 |
-| `/rime delp <名称>` | 删除自己的私人传送点。别名：`delpersonal`。 |
-| `/rime delg <名称>` | 删除公共传送点。别名：`delglobal`。 |
-| `/rime list` | 列出私人和公共传送点。 |
-| `/rime listp` | 只列出私人传送点。别名：`listpersonal`。 |
-| `/rime listg` | 只列出公共传送点。别名：`listglobal`。 |
-| `/rime descp <名称> <描述>` | 修改私人传送点描述。 |
-| `/rime descg <名称> <描述>` | 修改公共传送点描述。 |
-| `/rime gui` | 打开自己的传送点管理界面。 |
-| `/rime manage <在线玩家>` | 管理指定玩家的传送点；仅管理员。 |
-| `/rime tpother <玩家名或 UUID> [私人传送点]` | 打开其他玩家的私人点列表，或直接传送到指定点；需要相应权限。 |
+| 命令                                  | 说明                                        |
+|-------------------------------------|-------------------------------------------|
+| `/rime setp [-f] <名称> [描述]`         | 在当前位置创建私人传送点；`-f` 覆盖同名点。别名：`setpersonal`。 |
+| `/rime setg [-f] <名称> [描述]`         | 在当前位置创建公共传送点；`-f` 覆盖同名点。别名：`setglobal`。   |
+| `/rime tpp <名称>`                    | 传送到自己的私人传送点。别名：`tpersonal`。               |
+| `/rime tpg <名称>`                    | 传送到公共传送点。别名：`tglobal`。                    |
+| `/rime delp <名称>`                   | 删除自己的私人传送点。别名：`delpersonal`。              |
+| `/rime delg <名称>`                   | 删除公共传送点。别名：`delglobal`。                   |
+| `/rime list`                        | 列出私人和公共传送点。                               |
+| `/rime listp`                       | 只列出私人传送点。别名：`listpersonal`。               |
+| `/rime listg`                       | 只列出公共传送点。别名：`listglobal`。                 |
+| `/rime descp <名称> <描述>`             | 修改私人传送点描述。                                |
+| `/rime descg <名称> <描述>`             | 修改公共传送点描述。                                |
+| `/rime gui`                         | 打开自己的传送点管理界面。                             |
+| `/rime manage <在线玩家>`               | 管理指定玩家的传送点；仅管理员。                          |
+| `/rime tpother <玩家名或 UUID> [私人传送点]` | 打开其他玩家的私人点列表，或直接传送到指定点；需要相应权限。            |
 
 ### 玩家传送
 
-| 命令 | 说明 |
-| --- | --- |
-| `/rime tp <在线玩家>` | 将自己传送到目标玩家；默认需要管理权限。 |
-| `/rime tphere <在线玩家>` | 将目标玩家传送到自己身边；默认需要管理权限。 |
-| `/rime tpa <在线玩家>` | 请求传送到目标玩家。 |
-| `/rime tpahere <在线玩家>` | 请求目标玩家传送到自己身边。 |
-| `/rime accept [玩家]` | 接受最新请求或指定玩家的请求。别名：`allow`。 |
-| `/rime deny [玩家]` | 拒绝最新请求或指定玩家的请求。别名：`reject`。 |
-| `/rime cancel` | 取消自己发出的待处理 TPA 请求。 |
-| `/rime tpaallow <玩家名或 UUID>` | 允许指定玩家以后直接传送到自己。 |
-| `/rime tpadisallow <玩家名或 UUID>` | 从直接传送允许列表移除玩家。 |
-| `/rime tpaallowlist` | 查看自己的直接传送允许列表。 |
-| `/rime back` | 返回上一个位置或死亡位置。 |
-| `/rime last <玩家名或 UUID>` | 传送到玩家最后一次下线的位置；需要相应权限。 |
-| `/rime rtp` | 在当前世界随机传送。 |
-| `/rime confirm` | 确认一次不安全位置传送。 |
-| `/rime cancelconfirm` | 取消待确认的不安全位置传送。 |
+| 命令                              | 说明                          |
+|---------------------------------|-----------------------------|
+| `/rime tp <在线玩家>`               | 将自己传送到目标玩家；默认需要管理权限。        |
+| `/rime tphere <在线玩家>`           | 将目标玩家传送到自己身边；默认需要管理权限。      |
+| `/rime tpa <在线玩家>`              | 请求传送到目标玩家。                  |
+| `/rime tpahere <在线玩家>`          | 请求目标玩家传送到自己身边。              |
+| `/rime accept [玩家]`             | 接受最新请求或指定玩家的请求。别名：`allow`。  |
+| `/rime deny [玩家]`               | 拒绝最新请求或指定玩家的请求。别名：`reject`。 |
+| `/rime cancel`                  | 取消自己发出的待处理 TPA 请求。          |
+| `/rime tpaallow <玩家名或 UUID>`    | 允许指定玩家以后直接传送到自己。            |
+| `/rime tpadisallow <玩家名或 UUID>` | 从直接传送允许列表移除玩家。              |
+| `/rime tpaallowlist`            | 查看自己的直接传送允许列表。              |
+| `/rime back`                    | 返回上一个位置或死亡位置。               |
+| `/rime last <玩家名或 UUID>`        | 传送到玩家最后一次下线的位置；需要相应权限。      |
+| `/rime rtp`                     | 在当前世界随机传送。                  |
+| `/rime confirm`                 | 确认一次不安全位置传送。                |
+| `/rime cancelconfirm`           | 取消待确认的不安全位置传送。              |
 
 ### 管理与维护
 
-| 命令 | 说明 |
-| --- | --- |
-| `/rime help` | 显示传送模块帮助。 |
-| `/rime reload` | 从磁盘重新加载配置、语言、传送点、TPA 允许列表和离线位置；仅管理员。 |
+| 命令                                                                                          | 说明                                     |
+|---------------------------------------------------------------------------------------------|----------------------------------------|
+| `/rime help`                                                                                | 显示传送模块帮助。                              |
+| `/rime reload`                                                                              | 从磁盘重新加载配置、语言、传送点、TPA 允许列表和离线位置；仅管理员。   |
 | `/rime importstp [文件] [--include-back] [--clear] [--offline-uuid\|--raw-uuid\|--auto-uuid]` | 导入兼容数据；默认文件为 `example_data.json`，仅管理员。 |
-| `/rime testwp [名称]` | 在当前位置创建测试公共传送点；仅管理员调试使用。 |
+| `/rime testwp [名称]`                                                                         | 在当前位置创建测试公共传送点；仅管理员调试使用。               |
 
 `easy_tp` 启用时，也可以使用 `/rime <传送点名或在线玩家名>` 快速匹配传送目标。
 
@@ -197,9 +197,9 @@ README 由 AI 生成。
 
 头衔命令仅在服务端安装 LuckPerms 后注册。
 
-| 命令 | 说明 |
-| --- | --- |
-| `/title list` | 列出所有已启用头衔。 |
+| 命令                      | 说明                     |
+|-------------------------|------------------------|
+| `/title list`           | 列出所有已启用头衔。             |
 | `/title select <头衔 ID>` | 选择已通过 LuckPerms 解锁的头衔。 |
 
 #### RankBoard 周榜与月榜头衔
@@ -217,7 +217,8 @@ README 由 AI 生成。
 `monthly_<榜单 ID>_t<名次>`，显示名称格式为 `<yy>年<MM>月<榜单>T<名次>`，例如
 `26年7月大胃王榜T1`。
 
-- 月榜 T1 至 T3 在聊天和 PlaceholderAPI 中按字符使用彩虹渐变；T1 头衔库预览色跟随 RankBoard 榜单配置，T2、T3 预览色为金黄色 `#FFD700`。
+- 月榜 T1 至 T3 在聊天和 PlaceholderAPI 中按字符使用彩虹渐变；T1 头衔库预览色跟随 RankBoard 榜单配置，T2、T3 预览色为金黄色
+  `#FFD700`。
 - 月榜 T2、T3 使用金黄色 `#FFD700`。
 - 月榜 T4 至 T10 使用绿色 `#55FF55`。
 - 月榜头衔结算后不会自动收回，玩家可以长期佩戴。
@@ -228,22 +229,22 @@ README 由 AI 生成。
 
 这些命令只在安装了模组客户端时存在，用于测试 TPA 提示界面：
 
-| 命令 | 说明 |
-| --- | --- |
-| `/rimenotify` | 循环切换 TPA 通知样式。 |
+| 命令                        | 说明                         |
+|---------------------------|----------------------------|
+| `/rimenotify`             | 循环切换 TPA 通知样式。             |
 | `/rimetest tpa <玩家> [类型]` | 创建测试 TPA 通知；类型为 `0` 或 `1`。 |
-| `/rimetest result <玩家>` | 将指定玩家的测试请求标记为已接受。 |
-| `/rimetest toast` | 一次创建两条测试通知。 |
+| `/rimetest result <玩家>`   | 将指定玩家的测试请求标记为已接受。          |
+| `/rimetest toast`         | 一次创建两条测试通知。                |
 
 ## Placeholder API
 
 占位符使用 Placeholder API 的 `%命名空间:路径%` 格式：
 
-| 占位符 | 返回内容 |
-| --- | --- |
-| `%rime-tools:title%` | 当前玩家可见头衔，保留头衔颜色；没有可见头衔时返回配置中的默认头衔。 |
-| `%rime-tools:title_id%` | 当前可见头衔的稳定 ID；没有头衔时返回空字符串。仅安装 LuckPerms 时注册。 |
-| `%rime-tools:title_decorated%` | 带方括号装饰和颜色的头衔，例如 `[ 管理员 ]`。 |
+| 占位符                            | 返回内容                                        |
+|--------------------------------|---------------------------------------------|
+| `%rime-tools:title%`           | 当前玩家可见头衔，保留头衔颜色；没有可见头衔时返回配置中的默认头衔。          |
+| `%rime-tools:title_id%`        | 当前可见头衔的稳定 ID；没有头衔时返回空字符串。仅安装 LuckPerms 时注册。 |
+| `%rime-tools:title_decorated%` | 带方括号装饰和颜色的头衔，例如 `[ 管理员 ]`。                  |
 
 示例：
 
@@ -262,28 +263,28 @@ README 由 AI 生成。
 `rime-tools:路径`。`默认开放`表示没有权限插件覆盖时普通玩家也可使用；`仅管理员`
 表示默认要求服务器管理员权限。拥有 `rime-tools:admin` 会绕过传送模块的其他权限检查。
 
-| 权限节点 | 默认值 | 控制内容 |
-| --- | --- | --- |
-| `rime-tools:admin` | 仅管理员 | `/rime reload`、`manage`、`importstp`、`testwp`，并绕过所有传送权限。 |
-| `rime-tools:personal` | 默认开放 | 创建、覆盖、编辑和删除自己的私人传送点。 |
-| `rime-tools:personal/tp` | 默认开放 | 传送到自己的私人传送点。 |
-| `rime-tools:global` | 仅管理员 | 创建、覆盖、编辑和删除公共传送点。 |
-| `rime-tools:global/tp` | 默认开放 | 传送到公共传送点。 |
-| `rime-tools:list` | 默认开放 | 使用传送点列表命令。 |
-| `rime-tools:tp` | 仅管理员 | 使用 `/rime tp` 直接传送到其他玩家。 |
-| `rime-tools:tphere` | 仅管理员 | 使用 `/rime tphere` 拉取其他玩家。 |
-| `rime-tools:tpa` | 默认开放 | 发送 `/rime tpa` 请求。 |
-| `rime-tools:tpahere` | 默认开放 | 发送 `/rime tpahere` 请求。 |
-| `rime-tools:tpa/allowlist` | 默认开放 | 管理和查看 TPA 直接传送允许列表。 |
-| `rime-tools:back` | 默认开放 | 使用 `/rime back`。 |
-| `rime-tools:last` | 仅管理员 | 传送到玩家最后下线位置。 |
-| `rime-tools:other_personal` | 仅管理员 | 查看并传送到其他玩家的私人传送点。 |
-| `rime-tools:rtp` | 默认开放 | 使用随机传送。 |
-| `rime-tools:easy` | 默认开放 | 使用 `/rime <名称>` 快速匹配。 |
-| `rime-tools:crossworld` | 仅管理员 | 允许跨世界传送。 |
-| `rime-tools:cooldown/bypass` | 仅管理员 | 绕过所有传送冷却。 |
-| `rime-tools:cost/bypass` | 仅管理员 | 绕过经验和物品消耗。 |
-| `rime-tools:safety/bypass` | 仅管理员 | 绕过目标位置安全检查。 |
+| 权限节点                         | 默认值  | 控制内容                                                    |
+|------------------------------|------|---------------------------------------------------------|
+| `rime-tools:admin`           | 仅管理员 | `/rime reload`、`manage`、`importstp`、`testwp`，并绕过所有传送权限。 |
+| `rime-tools:personal`        | 默认开放 | 创建、覆盖、编辑和删除自己的私人传送点。                                    |
+| `rime-tools:personal/tp`     | 默认开放 | 传送到自己的私人传送点。                                            |
+| `rime-tools:global`          | 仅管理员 | 创建、覆盖、编辑和删除公共传送点。                                       |
+| `rime-tools:global/tp`       | 默认开放 | 传送到公共传送点。                                               |
+| `rime-tools:list`            | 默认开放 | 使用传送点列表命令。                                              |
+| `rime-tools:tp`              | 仅管理员 | 使用 `/rime tp` 直接传送到其他玩家。                                |
+| `rime-tools:tphere`          | 仅管理员 | 使用 `/rime tphere` 拉取其他玩家。                               |
+| `rime-tools:tpa`             | 默认开放 | 发送 `/rime tpa` 请求。                                      |
+| `rime-tools:tpahere`         | 默认开放 | 发送 `/rime tpahere` 请求。                                  |
+| `rime-tools:tpa/allowlist`   | 默认开放 | 管理和查看 TPA 直接传送允许列表。                                     |
+| `rime-tools:back`            | 默认开放 | 使用 `/rime back`。                                        |
+| `rime-tools:last`            | 仅管理员 | 传送到玩家最后下线位置。                                            |
+| `rime-tools:other_personal`  | 仅管理员 | 查看并传送到其他玩家的私人传送点。                                       |
+| `rime-tools:rtp`             | 默认开放 | 使用随机传送。                                                 |
+| `rime-tools:easy`            | 默认开放 | 使用 `/rime <名称>` 快速匹配。                                   |
+| `rime-tools:crossworld`      | 仅管理员 | 允许跨世界传送。                                                |
+| `rime-tools:cooldown/bypass` | 仅管理员 | 绕过所有传送冷却。                                               |
+| `rime-tools:cost/bypass`     | 仅管理员 | 绕过经验和物品消耗。                                              |
+| `rime-tools:safety/bypass`   | 仅管理员 | 绕过目标位置安全检查。                                             |
 
 示例取决于服务器安装的 Fabric 权限提供器。使用支持 Identifier 节点的 LuckPerms
 桥接时，授权形式类似：
@@ -298,12 +299,12 @@ README 由 AI 生成。
 
 头衔模块直接使用 LuckPerms 权限节点。所有节点都需要明确授予：
 
-| 权限节点 | 控制内容 |
-| --- | --- |
-| `rime-tools.title.admin` | 允许进入头衔定义管理和玩家授权界面，相当于后两个管理节点的总权限。 |
-| `rime-tools.title.admin.titles` | 新建、编辑和删除头衔定义。 |
-| `rime-tools.title.admin.assign` | 查看已知玩家并授予或撤销其头衔。 |
-| `rime-tools.title.title.<头衔 ID>` | 解锁指定头衔，允许玩家选择并显示该头衔。 |
+| 权限节点                             | 控制内容                              |
+|----------------------------------|-----------------------------------|
+| `rime-tools.title.admin`         | 允许进入头衔定义管理和玩家授权界面，相当于后两个管理节点的总权限。 |
+| `rime-tools.title.admin.titles`  | 新建、编辑和删除头衔定义。                     |
+| `rime-tools.title.admin.assign`  | 查看已知玩家并授予或撤销其头衔。                  |
+| `rime-tools.title.title.<头衔 ID>` | 解锁指定头衔，允许玩家选择并显示该头衔。              |
 
 周榜与月榜头衔使用同一权限格式，例如
 `rime-tools.title.title.weekly_food_t1` 和 `rime-tools.title.title.monthly_food_t1`。

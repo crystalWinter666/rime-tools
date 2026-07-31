@@ -27,8 +27,6 @@ public final class RimeUi {
     private RimeUi() {
     }
 
-    public enum Style { PRIMARY, SECONDARY, DANGER, GHOST, TAB }
-
     public static AbstractButton button(int x, int y, int width, int height, Component message,
                                         Style style, Runnable action) {
         return button(x, y, width, height, message, style, false, action);
@@ -74,4 +72,6 @@ public final class RimeUi {
     public static boolean contains(double mouseX, double mouseY, int x, int y, int width, int height) {
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
+
+    public enum Style {PRIMARY, SECONDARY, DANGER, GHOST, TAB}
 }

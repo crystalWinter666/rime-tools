@@ -2,8 +2,8 @@ package org.rimecraft.rimetools.module.title.network;
 
 import org.rimecraft.rimetools.module.title.title.TitleInputValidator;
 
-import java.util.regex.Pattern;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public final class PayloadValidation {
     private static final Pattern PLAYER_NAME = Pattern.compile("[A-Za-z0-9_]{1,16}");

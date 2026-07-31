@@ -5,13 +5,7 @@ import net.minecraft.server.MinecraftServer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public final class RankBoardAccess {
     private static final String MOD_CLASS = "cn.bamgdam.rankboard.RankBoardMod";
@@ -55,6 +49,11 @@ public final class RankBoardAccess {
         } catch (ReflectiveOperationException | LinkageError exception) {
             return null;
         }
+    }
+
+    private static <T extends java.lang.reflect.AccessibleObject> T accessible(T value) {
+        value.setAccessible(true);
+        return value;
     }
 
     public List<BoardRanking> rankings(MinecraftServer server, LocalDate from, LocalDate to, int limit)
@@ -107,11 +106,6 @@ public final class RankBoardAccess {
         } catch (ReflectiveOperationException exception) {
             return false;
         }
-    }
-
-    private static <T extends java.lang.reflect.AccessibleObject> T accessible(T value) {
-        value.setAccessible(true);
-        return value;
     }
 
     public record BoardRanking(String metricId, String label, String color, List<Winner> winners) {

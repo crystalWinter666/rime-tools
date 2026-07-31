@@ -21,5 +21,5 @@ public final class CooldownManager {
         }
     }
 
-    public enum Type { WAYPOINT, TP, BACK, RANDOM }
+    public enum Type {WAYPOINT, TP, BACK, RANDOM}
 }

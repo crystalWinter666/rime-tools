@@ -1,13 +1,12 @@
 package org.rimecraft.rimetools.module.title.chat;
 
-import org.rimecraft.rimetools.RimeTools;
-
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
+import org.rimecraft.rimetools.RimeTools;
 import org.rimecraft.rimetools.module.title.TitleModule;
 import org.rimecraft.rimetools.module.title.storage.TitleRepository;
 

@@ -1,7 +1,8 @@
 package org.rimecraft.rimetools.module.teleport.util;
 
 public final class TimeUtil {
-    private TimeUtil() { }
+    private TimeUtil() {
+    }
 
     public static String formatSeconds(long seconds) {
         long safe = Math.max(0, seconds);

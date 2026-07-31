@@ -2,12 +2,7 @@ package org.rimecraft.rimetools.module.teleport.i18n;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 import org.rimecraft.rimetools.module.teleport.config.TeleportConfig;
 import org.yaml.snakeyaml.Yaml;
@@ -15,12 +10,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public final class MessageService {
     private final Path dataDirectory;
@@ -31,6 +21,17 @@ public final class MessageService {
     public MessageService(Path dataDirectory, String defaultLocale) {
         this.dataDirectory = dataDirectory;
         this.defaultLocale = defaultLocale == null ? "en_US" : defaultLocale;
+    }
+
+    public static Map<String, Object> vars(Object... values) {
+        if (values.length % 2 != 0) {
+            throw new IllegalArgumentException("Variables must be key/value pairs");
+        }
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (int index = 0; index < values.length; index += 2) {
+            result.put(String.valueOf(values[index]), values[index + 1]);
+        }
+        return result;
     }
 
     public void load() throws Exception {
@@ -135,17 +136,6 @@ public final class MessageService {
         }
         Map<String, String> fallback = bundle == zh ? en : zh;
         return fallback.getOrDefault(key, "[" + key + "]");
-    }
-
-    public static Map<String, Object> vars(Object... values) {
-        if (values.length % 2 != 0) {
-            throw new IllegalArgumentException("Variables must be key/value pairs");
-        }
-        Map<String, Object> result = new LinkedHashMap<>();
-        for (int index = 0; index < values.length; index += 2) {
-            result.put(String.valueOf(values[index]), values[index + 1]);
-        }
-        return result;
     }
 
     private MutableComponent parse(String raw, Map<String, ?> variables) {

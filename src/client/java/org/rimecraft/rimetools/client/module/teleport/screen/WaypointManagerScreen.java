@@ -6,10 +6,10 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.PlayerFaceExtractor;
-import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.PlayerSkin;
 import org.rimecraft.rimetools.client.ui.ModuleSwitcher;
@@ -23,11 +23,7 @@ import org.rimecraft.rimetools.module.teleport.network.TpaAllowlistActionPayload
 import org.rimecraft.rimetools.module.teleport.network.WaypointActionPayload;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 
 public final class WaypointManagerScreen extends Screen {
 
@@ -40,13 +36,12 @@ public final class WaypointManagerScreen extends Screen {
     private static final int SCROLL_BAR_WIDTH = 4;
     private static final int ACTION_SIZE = 22;
     private static final int ACTION_GAP = 4;
-
+    private final ModuleSwitcher moduleSwitcher = new ModuleSwitcher(TeleportModule.ID);
     private OpenWaypointScreenPayload data;
     private List<Waypoint> personalWaypoints;
     private List<Waypoint> globalWaypoints;
     private List<FakePlayerInfo> fakePlayers;
     private List<TeleportPlayerTarget> playerTargets;
-    private final ModuleSwitcher moduleSwitcher = new ModuleSwitcher(TeleportModule.ID);
     private int currentTab;
     private int scrollOffset;
     private boolean draggingScrollBar;
@@ -73,6 +68,54 @@ public final class WaypointManagerScreen extends Screen {
         setData(data);
     }
 
+    private static List<Waypoint> sortedCopy(List<Waypoint> waypoints) {
+        List<Waypoint> result = new ArrayList<>(waypoints);
+        result.sort(Comparator.comparing(Waypoint::getName, String.CASE_INSENSITIVE_ORDER));
+        return result;
+    }
+
+    private static void renderPlayerAvatar(GuiGraphicsExtractor graphics, String playerName,
+                                           int x, int y, int accent) {
+        Minecraft minecraft = Minecraft.getInstance();
+        RimeUi.roundedRect(graphics, x, y, 24, 24, 0xFF202832);
+        PlayerFaceExtractor.extractRenderState(graphics, playerSkin(minecraft, playerName),
+                x + 2, y + 2, 20, 0xFFFFFFFF);
+        RimeUi.roundedOutline(graphics, x, y, 24, 24, accent);
+    }
+
+    private static PlayerSkin playerSkin(Minecraft minecraft, String playerName) {
+        var connection = minecraft.getConnection();
+        if (connection != null) {
+            var info = connection.getPlayerInfoIgnoreCase(playerName);
+            if (info != null) return info.getSkin();
+        }
+        UUID offlineUuid = UUID.nameUUIDFromBytes(
+                ("OfflinePlayer:" + playerName).getBytes(StandardCharsets.UTF_8));
+        return DefaultPlayerSkin.get(offlineUuid);
+    }
+
+    private static boolean matches(String query, String... values) {
+        for (String value : values) {
+            if (value != null && value.toLowerCase(Locale.ROOT).contains(query)) return true;
+        }
+        return false;
+    }
+
+    private static String firstCodePoint(String text) {
+        if (text == null || text.isBlank()) return "?";
+        int firstEnd = text.offsetByCodePoints(0, 1);
+        return text.substring(0, firstEnd);
+    }
+
+    private static String coordinateValues(double x, double y, double z) {
+        return String.format(Locale.ROOT, "%.0f  %.0f  %.0f", x, y, z);
+    }
+
+    private static String displayWorld(String world) {
+        int separator = world.indexOf(':');
+        return separator >= 0 ? world.substring(separator + 1) : world;
+    }
+
     private void setData(OpenWaypointScreenPayload data) {
         this.data = data;
         this.personalWaypoints = sortedCopy(data.personalWaypoints());
@@ -81,12 +124,6 @@ public final class WaypointManagerScreen extends Screen {
         this.fakePlayers.sort(Comparator.comparing(FakePlayerInfo::name, String.CASE_INSENSITIVE_ORDER));
         this.playerTargets = new ArrayList<>(data.playerTargets());
         invalidateFilterCache();
-    }
-
-    private static List<Waypoint> sortedCopy(List<Waypoint> waypoints) {
-        List<Waypoint> result = new ArrayList<>(waypoints);
-        result.sort(Comparator.comparing(Waypoint::getName, String.CASE_INSENSITIVE_ORDER));
-        return result;
     }
 
     @Override
@@ -368,13 +405,13 @@ public final class WaypointManagerScreen extends Screen {
         String titleKey = !normalizedSearch().isEmpty()
                 ? "rime-tools.teleport.screen.waypoints.no_results"
                 : currentTab == TAB_FAKE_PLAYERS
-                ? "rime-tools.teleport.screen.waypoints.no_fake_players"
-                : "rime-tools.teleport.screen.waypoints.empty";
+                  ? "rime-tools.teleport.screen.waypoints.no_fake_players"
+                  : "rime-tools.teleport.screen.waypoints.empty";
         String hintKey = !normalizedSearch().isEmpty()
                 ? "rime-tools.teleport.screen.waypoints.no_results_hint"
                 : currentTab == TAB_FAKE_PLAYERS
-                ? "rime-tools.teleport.screen.waypoints.no_fake_players_hint"
-                : "rime-tools.teleport.screen.waypoints.empty_hint";
+                  ? "rime-tools.teleport.screen.waypoints.no_fake_players_hint"
+                  : "rime-tools.teleport.screen.waypoints.empty_hint";
         int centerY = layout.listTop() + layout.listHeight() / 2;
         graphics.centeredText(font, Component.translatable(titleKey),
                 layout.panelX() + layout.panelWidth() / 2, centerY - 11, RimeUi.TEXT);
@@ -506,26 +543,6 @@ public final class WaypointManagerScreen extends Screen {
                                    int x, int y, int right) {
         graphics.text(font, trimToWidth(coordinates, Math.max(1, right - x)),
                 x, y, RimeUi.FAINT, false);
-    }
-
-    private static void renderPlayerAvatar(GuiGraphicsExtractor graphics, String playerName,
-                                           int x, int y, int accent) {
-        Minecraft minecraft = Minecraft.getInstance();
-        RimeUi.roundedRect(graphics, x, y, 24, 24, 0xFF202832);
-        PlayerFaceExtractor.extractRenderState(graphics, playerSkin(minecraft, playerName),
-                x + 2, y + 2, 20, 0xFFFFFFFF);
-        RimeUi.roundedOutline(graphics, x, y, 24, 24, accent);
-    }
-
-    private static PlayerSkin playerSkin(Minecraft minecraft, String playerName) {
-        var connection = minecraft.getConnection();
-        if (connection != null) {
-            var info = connection.getPlayerInfoIgnoreCase(playerName);
-            if (info != null) return info.getSkin();
-        }
-        UUID offlineUuid = UUID.nameUUIDFromBytes(
-                ("OfflinePlayer:" + playerName).getBytes(StandardCharsets.UTF_8));
-        return DefaultPlayerSkin.get(offlineUuid);
     }
 
     private void renderScrollBar(GuiGraphicsExtractor graphics, Layout layout, int itemCount) {
@@ -834,14 +851,14 @@ public final class WaypointManagerScreen extends Screen {
 
         List<Waypoint> waypointSource = currentTab == TAB_PERSONAL ? personalWaypoints : globalWaypoints;
         cachedWaypoints = query.isEmpty() ? waypointSource : waypointSource.stream()
-                .filter(waypoint -> matches(query, waypoint.getName(), waypoint.getAlias(),
-                        waypoint.getDescription(), waypoint.getWorld())).toList();
+                                                             .filter(waypoint -> matches(query, waypoint.getName(), waypoint.getAlias(),
+                                                                     waypoint.getDescription(), waypoint.getWorld())).toList();
         cachedFakePlayers = query.isEmpty() ? fakePlayers : fakePlayers.stream()
-                .filter(fakePlayer -> matches(query, fakePlayer.name(), fakePlayer.creatorName(),
-                        fakePlayer.world())).toList();
+                                                            .filter(fakePlayer -> matches(query, fakePlayer.name(), fakePlayer.creatorName(),
+                                                                    fakePlayer.world())).toList();
         cachedPlayerTargets = query.isEmpty() ? playerTargets : playerTargets.stream()
-                .filter(player -> player.name().toLowerCase(Locale.ROOT).contains(query)
-                        || player.uuid().toString().contains(query)).toList();
+                                                                .filter(player -> player.name().toLowerCase(Locale.ROOT).contains(query)
+                                                                                  || player.uuid().toString().contains(query)).toList();
     }
 
     private void invalidateFilterCache() {
@@ -902,7 +919,8 @@ public final class WaypointManagerScreen extends Screen {
 
     private void runPlayerCommand(String subcommand, boolean requiresOnline) {
         TeleportPlayerTarget selected = selectedPlayer();
-        if (selected == null || requiresOnline && !selected.online() || minecraft == null || minecraft.player == null) return;
+        if (selected == null || requiresOnline && !selected.online() || minecraft == null || minecraft.player == null)
+            return;
         String target = requiresOnline ? selected.name() : selected.uuid().toString();
         minecraft.player.connection.sendCommand("rime " + subcommand + " " + target);
         playerDropdownOpen = false;
@@ -929,13 +947,6 @@ public final class WaypointManagerScreen extends Screen {
         return searchQuery.trim().toLowerCase(Locale.ROOT);
     }
 
-    private static boolean matches(String query, String... values) {
-        for (String value : values) {
-            if (value != null && value.toLowerCase(Locale.ROOT).contains(query)) return true;
-        }
-        return false;
-    }
-
     private String trimToWidth(String text, int maxWidth) {
         if (font.width(text) <= maxWidth) return text;
         String ellipsis = "...";
@@ -946,23 +957,8 @@ public final class WaypointManagerScreen extends Screen {
         return Component.literal(trimToWidth(text.getString(), maxWidth));
     }
 
-    private static String firstCodePoint(String text) {
-        if (text == null || text.isBlank()) return "?";
-        int firstEnd = text.offsetByCodePoints(0, 1);
-        return text.substring(0, firstEnd);
-    }
-
     private int centeredTextY(int fieldY, int fieldHeight) {
         return fieldY + (fieldHeight - font.lineHeight) / 2 + 1;
-    }
-
-    private static String coordinateValues(double x, double y, double z) {
-        return String.format(Locale.ROOT, "%.0f  %.0f  %.0f", x, y, z);
-    }
-
-    private static String displayWorld(String world) {
-        int separator = world.indexOf(':');
-        return separator >= 0 ? world.substring(separator + 1) : world;
     }
 
     private void teleportTo(Waypoint waypoint) {
@@ -1074,11 +1070,28 @@ public final class WaypointManagerScreen extends Screen {
                           int contentX, int contentWidth, boolean compact, int headerBottom,
                           int searchY, int searchHeight, int tabsY, int tabHeight,
                           int listTop, int footerY, int footerHeight) {
-        int panelRight() { return panelX + panelWidth; }
-        int contentRight() { return contentX + contentWidth; }
-        int listBottom() { return Math.max(listTop + 1, footerY - (compact ? 4 : 6)); }
-        int listHeight() { return Math.max(1, listBottom() - listTop); }
-        int footerButtonHeight() { return compact ? 22 : 24; }
-        int footerButtonOffset() { return (footerHeight - footerButtonHeight()) / 2; }
+        int panelRight() {
+            return panelX + panelWidth;
+        }
+
+        int contentRight() {
+            return contentX + contentWidth;
+        }
+
+        int listBottom() {
+            return Math.max(listTop + 1, footerY - (compact ? 4 : 6));
+        }
+
+        int listHeight() {
+            return Math.max(1, listBottom() - listTop);
+        }
+
+        int footerButtonHeight() {
+            return compact ? 22 : 24;
+        }
+
+        int footerButtonOffset() {
+            return (footerHeight - footerButtonHeight()) / 2;
+        }
     }
 }

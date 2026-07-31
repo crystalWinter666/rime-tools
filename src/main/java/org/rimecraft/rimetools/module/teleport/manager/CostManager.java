@@ -84,5 +84,6 @@ public final class CostManager {
         };
     }
 
-    public record CostResult(int expCost, int itemCost, boolean affordable) { }
+    public record CostResult(int expCost, int itemCost, boolean affordable) {
+    }
 }

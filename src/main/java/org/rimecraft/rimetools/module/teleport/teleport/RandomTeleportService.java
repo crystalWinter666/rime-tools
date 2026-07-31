@@ -207,5 +207,6 @@ public final class RandomTeleportService {
         }
     }
 
-    private record Candidate(int blockX, int blockZ, int chunkX, int chunkZ) { }
+    private record Candidate(int blockX, int blockZ, int chunkX, int chunkZ) {
+    }
 }

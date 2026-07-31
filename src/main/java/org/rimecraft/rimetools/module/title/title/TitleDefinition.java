@@ -1,15 +1,13 @@
 package org.rimecraft.rimetools.module.title.title;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-public record TitleDefinition(String id, String displayName, String color, int weight, boolean enabled, boolean gradient) {
-    private static final int[] RAINBOW = {
-            0xFF5555, 0xFFAA00, 0xFFFF55, 0x55FF55, 0x55FFFF, 0x5555FF, 0xFF55FF
-    };
+public record TitleDefinition(String id, String displayName, String color, int weight, boolean enabled,
+                              boolean gradient) {
     public static final Codec<TitleDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("id").forGetter(TitleDefinition::id),
             Codec.STRING.fieldOf("display_name").forGetter(TitleDefinition::displayName),
@@ -18,6 +16,9 @@ public record TitleDefinition(String id, String displayName, String color, int w
             Codec.BOOL.fieldOf("enabled").forGetter(TitleDefinition::enabled),
             Codec.BOOL.optionalFieldOf("gradient", false).forGetter(TitleDefinition::gradient)
     ).apply(instance, TitleDefinition::new));
+    private static final int[] RAINBOW = {
+            0xFF5555, 0xFFAA00, 0xFFFF55, 0x55FF55, 0x55FFFF, 0x5555FF, 0xFF55FF
+    };
 
     public TitleDefinition(String id, String displayName, String color, int weight, boolean enabled) {
         this(id, displayName, color, weight, enabled, false);

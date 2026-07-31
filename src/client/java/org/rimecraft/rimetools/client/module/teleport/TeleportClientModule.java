@@ -1,8 +1,8 @@
 package org.rimecraft.rimetools.client.module.teleport;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -17,11 +17,11 @@ import org.lwjgl.glfw.GLFW;
 import org.rimecraft.rimetools.RimeTools;
 import org.rimecraft.rimetools.client.module.ClientModuleContext;
 import org.rimecraft.rimetools.client.module.RimeClientModule;
-import org.rimecraft.rimetools.client.ui.ClientGuiRegistry;
-import org.rimecraft.rimetools.module.teleport.TeleportModule;
 import org.rimecraft.rimetools.client.module.teleport.config.ClientConfig;
 import org.rimecraft.rimetools.client.module.teleport.screen.WaypointManagerScreen;
 import org.rimecraft.rimetools.client.module.teleport.toast.TpaToastManager;
+import org.rimecraft.rimetools.client.ui.ClientGuiRegistry;
+import org.rimecraft.rimetools.module.teleport.TeleportModule;
 import org.rimecraft.rimetools.module.teleport.network.OpenWaypointScreenPayload;
 import org.rimecraft.rimetools.module.teleport.network.TpaResultPayload;
 import org.rimecraft.rimetools.module.teleport.network.TpaToastPayload;
@@ -95,7 +95,8 @@ public final class TeleportClientModule implements RimeClientModule {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, reg) -> {
             dispatcher.register(ClientCommands.literal("rimenotify").executes(ctx -> {
-                var cfg = ClientConfig.get(); cfg.cycleStyle();
+                var cfg = ClientConfig.get();
+                cfg.cycleStyle();
                 ctx.getSource().sendFeedback(Component.literal("\u00a76[RIME]\u00a7r TPA: \u00a7e" + cfg.tpaNotificationStyle));
                 return 1;
             }));

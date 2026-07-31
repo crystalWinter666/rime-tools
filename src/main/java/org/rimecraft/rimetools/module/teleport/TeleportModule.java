@@ -12,11 +12,7 @@ import org.rimecraft.rimetools.module.RimeModuleContext;
 import org.rimecraft.rimetools.module.teleport.command.TeleportCommands;
 import org.rimecraft.rimetools.module.teleport.config.TeleportConfig;
 import org.rimecraft.rimetools.module.teleport.i18n.MessageService;
-import org.rimecraft.rimetools.module.teleport.manager.BackManager;
-import org.rimecraft.rimetools.module.teleport.manager.ConfirmManager;
-import org.rimecraft.rimetools.module.teleport.manager.CooldownManager;
-import org.rimecraft.rimetools.module.teleport.manager.CostManager;
-import org.rimecraft.rimetools.module.teleport.manager.TpaManager;
+import org.rimecraft.rimetools.module.teleport.manager.*;
 import org.rimecraft.rimetools.module.teleport.model.TeleportPosition;
 import org.rimecraft.rimetools.module.teleport.network.TeleportNetworking;
 import org.rimecraft.rimetools.module.teleport.repository.OfflinePositionRepository;
@@ -24,8 +20,8 @@ import org.rimecraft.rimetools.module.teleport.repository.RepositoryWriter;
 import org.rimecraft.rimetools.module.teleport.repository.TpaAllowlistRepository;
 import org.rimecraft.rimetools.module.teleport.repository.WaypointRepository;
 import org.rimecraft.rimetools.module.teleport.safety.SafetyChecker;
-import org.rimecraft.rimetools.module.teleport.teleport.TeleportService;
 import org.rimecraft.rimetools.module.teleport.teleport.RandomTeleportService;
+import org.rimecraft.rimetools.module.teleport.teleport.TeleportService;
 import org.slf4j.Logger;
 
 import java.nio.file.Files;
@@ -51,6 +47,24 @@ public final class TeleportModule implements RimeModule {
     private RandomTeleportService randomTeleports;
     private RepositoryWriter repositoryWriter;
     private long ticks;
+
+    private static void requireLoaded(boolean loaded, String dataName) {
+        if (!loaded) throw new IllegalStateException("Failed to load " + dataName);
+    }
+
+    private static void migrateLegacyConfig(RimeModuleContext context, Path configFile) {
+        Path legacy = context.moduleDirectory(TeleportModule.ID).resolve("config.yml");
+        if (Files.exists(configFile) || !Files.exists(legacy)) {
+            return;
+        }
+        try {
+            Files.createDirectories(configFile.getParent());
+            Files.copy(legacy, configFile);
+            context.logger().info("Migrated legacy configuration from {} to {}", legacy, configFile);
+        } catch (Exception exception) {
+            context.logger().warn("Could not migrate legacy configuration from {}: {}", legacy, exception.toString());
+        }
+    }
 
     @Override
     public String id() {
@@ -173,35 +187,52 @@ public final class TeleportModule implements RimeModule {
         randomTeleports = new RandomTeleportService(server, config, messages, cooldowns, safety, teleports);
     }
 
-    private static void requireLoaded(boolean loaded, String dataName) {
-        if (!loaded) throw new IllegalStateException("Failed to load " + dataName);
+    public Path dataDirectory() {
+        return dataDirectory;
     }
 
-    private static void migrateLegacyConfig(RimeModuleContext context, Path configFile) {
-        Path legacy = context.moduleDirectory(TeleportModule.ID).resolve("config.yml");
-        if (Files.exists(configFile) || !Files.exists(legacy)) {
-            return;
-        }
-        try {
-            Files.createDirectories(configFile.getParent());
-            Files.copy(legacy, configFile);
-            context.logger().info("Migrated legacy configuration from {} to {}", legacy, configFile);
-        } catch (Exception exception) {
-            context.logger().warn("Could not migrate legacy configuration from {}: {}", legacy, exception.toString());
-        }
+    public MinecraftServer server() {
+        return server;
     }
 
-    public Path dataDirectory() { return dataDirectory; }
-    public MinecraftServer server() { return server; }
-    public TeleportConfig config() { return config; }
-    public MessageService messages() { return messages; }
-    public WaypointRepository waypoints() { return waypoints; }
-    public TpaAllowlistRepository allowlist() { return allowlist; }
-    public OfflinePositionRepository offlinePositions() { return offlinePositions; }
-    public TeleportService teleports() { return teleports; }
-    public RandomTeleportService randomTeleports() { return randomTeleports; }
-    public BackManager backs() { return backs; }
-    public ConfirmManager confirms() { return confirms; }
-    public TpaManager tpa() { return tpa; }
+    public TeleportConfig config() {
+        return config;
+    }
+
+    public MessageService messages() {
+        return messages;
+    }
+
+    public WaypointRepository waypoints() {
+        return waypoints;
+    }
+
+    public TpaAllowlistRepository allowlist() {
+        return allowlist;
+    }
+
+    public OfflinePositionRepository offlinePositions() {
+        return offlinePositions;
+    }
+
+    public TeleportService teleports() {
+        return teleports;
+    }
+
+    public RandomTeleportService randomTeleports() {
+        return randomTeleports;
+    }
+
+    public BackManager backs() {
+        return backs;
+    }
+
+    public ConfirmManager confirms() {
+        return confirms;
+    }
+
+    public TpaManager tpa() {
+        return tpa;
+    }
 
 }

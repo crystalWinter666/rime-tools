@@ -38,6 +38,110 @@ public final class TpaToastManager implements HudElement {
                 InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, KeyMapping.Category.MULTIPLAYER);
     }
 
+    private static void renderAvatar(GuiGraphicsExtractor graphics, Minecraft minecraft, ToastEntry toast,
+                                     int x, int y, int accent, float visibility) {
+        roundedRect(graphics, x - 1, y - 1, 26, 26, color(0xFF252C34, visibility));
+        PlayerFaceExtractor.extractRenderState(graphics, playerSkin(minecraft, toast.name),
+                x + 1, y + 1, 22, color(0xFFFFFFFF, visibility));
+        roundedOutline(graphics, x - 1, y - 1, 26, 26, color(0xFF424B55, visibility));
+
+        graphics.fill(x + 18, y + 18, x + 25, y + 25, color(0xFF11151A, visibility));
+        graphics.fill(x + 20, y + 20, x + 23, y + 23, color(accent, visibility));
+    }
+
+    private static PlayerSkin playerSkin(Minecraft minecraft, String name) {
+        var connection = minecraft.getConnection();
+        if (connection != null) {
+            var info = connection.getPlayerInfoIgnoreCase(name);
+            if (info != null) return info.getSkin();
+        }
+        UUID offlineUuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8));
+        return DefaultPlayerSkin.get(offlineUuid);
+    }
+
+    private static int drawKeyAction(GuiGraphicsExtractor graphics, Minecraft minecraft, int x, int y,
+                                     Component key, Component label, int accent, float visibility) {
+        int keyWidth = minecraft.font.width(key) + 7;
+        int labelWidth = minecraft.font.width(label);
+        roundedRect(graphics, x, y - 1, keyWidth, 13, color(0xFF252C34, visibility));
+        roundedOutline(graphics, x, y - 1, keyWidth, 13, color(accent, visibility));
+        graphics.centeredText(minecraft.font, key, x + keyWidth / 2, y + 2, color(accent, visibility));
+        graphics.text(minecraft.font, label, x + keyWidth + 4, y + 1,
+                color(0xFF929DA8, visibility), false);
+        return keyWidth + labelWidth + 4;
+    }
+
+    private static int accentColor(ToastEntry toast) {
+        return switch (toast.state) {
+            case ACCEPTED -> 0xFF4ADE80;
+            case DENIED -> 0xFFFB7185;
+            case SENT -> 0xFF60A5FA;
+            case INCOMING -> toast.type == 0 ? 0xFF38BDF8 : 0xFFFBBF24;
+        };
+    }
+
+    private static int exitTicks(ToastEntry toast) {
+        return toast.state == State.ACCEPTED || toast.state == State.DENIED
+                ? RESULT_EXIT_TICKS
+                : REQUEST_EXIT_TICKS;
+    }
+
+    private static String bodyKey(ToastEntry toast) {
+        return switch (toast.state) {
+            case ACCEPTED -> "rime-tools.teleport.toast.accepted";
+            case DENIED -> "rime-tools.teleport.toast.denied";
+            case SENT -> "rime-tools.teleport.toast.sent";
+            case INCOMING -> toast.type == 0
+                    ? "rime-tools.teleport.toast.wants_tp"
+                    : "rime-tools.teleport.toast.wants_here";
+        };
+    }
+
+    private static String statusKey(ToastEntry toast) {
+        return switch (toast.state) {
+            case ACCEPTED -> "rime-tools.teleport.toast.accepted_title";
+            case DENIED -> "rime-tools.teleport.toast.denied_title";
+            case SENT -> "rime-tools.teleport.toast.waiting";
+            case INCOMING -> "rime-tools.teleport.toast.incoming_title";
+        };
+    }
+
+    private static String trim(Minecraft minecraft, String text, int maxWidth) {
+        if (minecraft.font.width(text) <= maxWidth) return text;
+        String ellipsis = "...";
+        return minecraft.font.plainSubstrByWidth(text,
+                Math.max(0, maxWidth - minecraft.font.width(ellipsis))) + ellipsis;
+    }
+
+    private static float easeOutCubic(float value) {
+        float inverse = 1.0f - value;
+        return 1.0f - inverse * inverse * inverse;
+    }
+
+    private static int color(int argb, float opacity) {
+        int alpha = (argb >>> 24) & 0xFF;
+        return (Mth.clamp((int) (alpha * opacity), 0, 255) << 24) | (argb & 0x00FFFFFF);
+    }
+
+    private static void roundedRect(GuiGraphicsExtractor graphics, int x, int y,
+                                    int width, int height, int color) {
+        graphics.fill(x + 2, y, x + width - 2, y + height, color);
+        graphics.fill(x, y + 2, x + width, y + height - 2, color);
+        graphics.fill(x + 1, y + 1, x + width - 1, y + height - 1, color);
+    }
+
+    private static void roundedOutline(GuiGraphicsExtractor graphics, int x, int y,
+                                       int width, int height, int color) {
+        graphics.fill(x + 2, y, x + width - 2, y + 1, color);
+        graphics.fill(x + 2, y + height - 1, x + width - 2, y + height, color);
+        graphics.fill(x, y + 2, x + 1, y + height - 2, color);
+        graphics.fill(x + width - 1, y + 2, x + width, y + height - 2, color);
+        graphics.fill(x + 1, y + 1, x + 2, y + 2, color);
+        graphics.fill(x + width - 2, y + 1, x + width - 1, y + 2, color);
+        graphics.fill(x + 1, y + height - 2, x + 2, y + height - 1, color);
+        graphics.fill(x + width - 2, y + height - 2, x + width - 1, y + height - 1, color);
+    }
+
     public void addIncoming(String name, int type, int seconds) {
         replace(new ToastEntry(name, type, seconds, State.INCOMING));
     }
@@ -149,7 +253,7 @@ public final class TpaToastManager implements HudElement {
                 : ENTER_TICKS;
         float remaining = toast.age <= progressStart ? 1.0f
                 : 1.0f - Mth.clamp((toast.age - progressStart)
-                / (float) Math.max(1, toast.duration - progressStart), 0.0f, 1.0f);
+                                   / (float) Math.max(1, toast.duration - progressStart), 0.0f, 1.0f);
         int progressWidth = (int) ((width - 4) * remaining);
         if (progressWidth > 0) {
             graphics.fill(x + 2, y + HEIGHT - 2, x + 2 + progressWidth, y + HEIGHT,
@@ -157,111 +261,7 @@ public final class TpaToastManager implements HudElement {
         }
     }
 
-    private static void renderAvatar(GuiGraphicsExtractor graphics, Minecraft minecraft, ToastEntry toast,
-                                     int x, int y, int accent, float visibility) {
-        roundedRect(graphics, x - 1, y - 1, 26, 26, color(0xFF252C34, visibility));
-        PlayerFaceExtractor.extractRenderState(graphics, playerSkin(minecraft, toast.name),
-                x + 1, y + 1, 22, color(0xFFFFFFFF, visibility));
-        roundedOutline(graphics, x - 1, y - 1, 26, 26, color(0xFF424B55, visibility));
-
-        graphics.fill(x + 18, y + 18, x + 25, y + 25, color(0xFF11151A, visibility));
-        graphics.fill(x + 20, y + 20, x + 23, y + 23, color(accent, visibility));
-    }
-
-    private static PlayerSkin playerSkin(Minecraft minecraft, String name) {
-        var connection = minecraft.getConnection();
-        if (connection != null) {
-            var info = connection.getPlayerInfoIgnoreCase(name);
-            if (info != null) return info.getSkin();
-        }
-        UUID offlineUuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8));
-        return DefaultPlayerSkin.get(offlineUuid);
-    }
-
-    private static int drawKeyAction(GuiGraphicsExtractor graphics, Minecraft minecraft, int x, int y,
-                                     Component key, Component label, int accent, float visibility) {
-        int keyWidth = minecraft.font.width(key) + 7;
-        int labelWidth = minecraft.font.width(label);
-        roundedRect(graphics, x, y - 1, keyWidth, 13, color(0xFF252C34, visibility));
-        roundedOutline(graphics, x, y - 1, keyWidth, 13, color(accent, visibility));
-        graphics.centeredText(minecraft.font, key, x + keyWidth / 2, y + 2, color(accent, visibility));
-        graphics.text(minecraft.font, label, x + keyWidth + 4, y + 1,
-                color(0xFF929DA8, visibility), false);
-        return keyWidth + labelWidth + 4;
-    }
-
-    private static int accentColor(ToastEntry toast) {
-        return switch (toast.state) {
-            case ACCEPTED -> 0xFF4ADE80;
-            case DENIED -> 0xFFFB7185;
-            case SENT -> 0xFF60A5FA;
-            case INCOMING -> toast.type == 0 ? 0xFF38BDF8 : 0xFFFBBF24;
-        };
-    }
-
-    private static int exitTicks(ToastEntry toast) {
-        return toast.state == State.ACCEPTED || toast.state == State.DENIED
-                ? RESULT_EXIT_TICKS
-                : REQUEST_EXIT_TICKS;
-    }
-
-    private static String bodyKey(ToastEntry toast) {
-        return switch (toast.state) {
-            case ACCEPTED -> "rime-tools.teleport.toast.accepted";
-            case DENIED -> "rime-tools.teleport.toast.denied";
-            case SENT -> "rime-tools.teleport.toast.sent";
-            case INCOMING -> toast.type == 0
-                    ? "rime-tools.teleport.toast.wants_tp"
-                    : "rime-tools.teleport.toast.wants_here";
-        };
-    }
-
-    private static String statusKey(ToastEntry toast) {
-        return switch (toast.state) {
-            case ACCEPTED -> "rime-tools.teleport.toast.accepted_title";
-            case DENIED -> "rime-tools.teleport.toast.denied_title";
-            case SENT -> "rime-tools.teleport.toast.waiting";
-            case INCOMING -> "rime-tools.teleport.toast.incoming_title";
-        };
-    }
-
-    private static String trim(Minecraft minecraft, String text, int maxWidth) {
-        if (minecraft.font.width(text) <= maxWidth) return text;
-        String ellipsis = "...";
-        return minecraft.font.plainSubstrByWidth(text,
-                Math.max(0, maxWidth - minecraft.font.width(ellipsis))) + ellipsis;
-    }
-
-    private static float easeOutCubic(float value) {
-        float inverse = 1.0f - value;
-        return 1.0f - inverse * inverse * inverse;
-    }
-
-    private static int color(int argb, float opacity) {
-        int alpha = (argb >>> 24) & 0xFF;
-        return (Mth.clamp((int) (alpha * opacity), 0, 255) << 24) | (argb & 0x00FFFFFF);
-    }
-
-    private static void roundedRect(GuiGraphicsExtractor graphics, int x, int y,
-                                    int width, int height, int color) {
-        graphics.fill(x + 2, y, x + width - 2, y + height, color);
-        graphics.fill(x, y + 2, x + width, y + height - 2, color);
-        graphics.fill(x + 1, y + 1, x + width - 1, y + height - 1, color);
-    }
-
-    private static void roundedOutline(GuiGraphicsExtractor graphics, int x, int y,
-                                       int width, int height, int color) {
-        graphics.fill(x + 2, y, x + width - 2, y + 1, color);
-        graphics.fill(x + 2, y + height - 1, x + width - 2, y + height, color);
-        graphics.fill(x, y + 2, x + 1, y + height - 2, color);
-        graphics.fill(x + width - 1, y + 2, x + width, y + height - 2, color);
-        graphics.fill(x + 1, y + 1, x + 2, y + 2, color);
-        graphics.fill(x + width - 2, y + 1, x + width - 1, y + 2, color);
-        graphics.fill(x + 1, y + height - 2, x + 2, y + height - 1, color);
-        graphics.fill(x + width - 2, y + height - 2, x + width - 1, y + height - 1, color);
-    }
-
-    enum State { INCOMING, SENT, ACCEPTED, DENIED }
+    enum State {INCOMING, SENT, ACCEPTED, DENIED}
 
     public static final class ToastEntry {
         public final String name;

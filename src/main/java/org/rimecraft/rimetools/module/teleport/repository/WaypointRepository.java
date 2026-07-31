@@ -11,17 +11,14 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 public final class WaypointRepository {
-    private static final Type PERSONAL_TYPE = new TypeToken<Map<String, Map<String, Waypoint>>>() { }.getType();
-    private static final Type GLOBAL_TYPE = new TypeToken<Map<String, Waypoint>>() { }.getType();
+    private static final Type PERSONAL_TYPE = new TypeToken<Map<String, Map<String, Waypoint>>>() {
+    }.getType();
+    private static final Type GLOBAL_TYPE = new TypeToken<Map<String, Waypoint>>() {
+    }.getType();
 
     private final Path personalFile;
     private final Path globalFile;
@@ -42,6 +39,12 @@ public final class WaypointRepository {
         globalFile = dataFolder.resolve("global_waypoints.json");
         this.logger = logger;
         this.writer = writer;
+    }
+
+    private static Waypoint copy(Waypoint waypoint) {
+        return new Waypoint(waypoint.getName(), waypoint.getWorld(), waypoint.getX(), waypoint.getY(),
+                waypoint.getZ(), waypoint.getYaw(), waypoint.getPitch(), waypoint.getAlias(),
+                waypoint.getDescription(), waypoint.getOwner(), waypoint.getCreatedAt(), waypoint.getUpdatedAt());
     }
 
     public synchronized boolean load() {
@@ -212,12 +215,6 @@ public final class WaypointRepository {
         Map<String, Waypoint> globalCopy = new HashMap<>();
         global.forEach((name, waypoint) -> globalCopy.put(name, copy(waypoint)));
         return new Snapshot(personalCopy, globalCopy);
-    }
-
-    private static Waypoint copy(Waypoint waypoint) {
-        return new Waypoint(waypoint.getName(), waypoint.getWorld(), waypoint.getX(), waypoint.getY(),
-                waypoint.getZ(), waypoint.getYaw(), waypoint.getPitch(), waypoint.getAlias(),
-                waypoint.getDescription(), waypoint.getOwner(), waypoint.getCreatedAt(), waypoint.getUpdatedAt());
     }
 
     private record Snapshot(Map<String, Map<String, Waypoint>> personal, Map<String, Waypoint> global) {

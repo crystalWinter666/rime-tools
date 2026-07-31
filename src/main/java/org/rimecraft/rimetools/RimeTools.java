@@ -3,9 +3,8 @@ package org.rimecraft.rimetools;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
-import org.rimecraft.rimetools.module.RimeModule;
-import org.rimecraft.rimetools.module.RimeModuleContext;
 import org.rimecraft.rimetools.module.ModuleRegistry;
+import org.rimecraft.rimetools.module.RimeModuleContext;
 import org.rimecraft.rimetools.module.teleport.TeleportModule;
 import org.rimecraft.rimetools.module.title.TitleModule;
 import org.slf4j.Logger;
@@ -20,6 +19,10 @@ public final class RimeTools implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
     private final ModuleRegistry moduleRegistry = new ModuleRegistry();
+
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
+    }
 
     @Override
     public void onInitialize() {
@@ -41,9 +44,5 @@ public final class RimeTools implements ModInitializer {
                 LOGGER.error("Failed to initialize {} module; continuing with other modules", module.id(), exception);
             }
         });
-    }
-
-    public static Identifier id(String path) {
-        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 }

@@ -6,11 +6,7 @@ import org.rimecraft.rimetools.module.teleport.config.TeleportConfig;
 import org.rimecraft.rimetools.module.teleport.i18n.MessageService;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class TpaManager {
@@ -79,6 +75,8 @@ public final class TpaManager {
         }
     }
 
-    public enum Type { TO_TARGET, HERE }
-    public record TpaRequest(UUID senderId, UUID targetId, Type type, long createdAt, long expiresAt) { }
+    public enum Type {TO_TARGET, HERE}
+
+    public record TpaRequest(UUID senderId, UUID targetId, Type type, long createdAt, long expiresAt) {
+    }
 }

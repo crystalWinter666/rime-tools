@@ -14,13 +14,8 @@ public final class ClientConfig {
             .resolve("rime-tools").resolve("teleport-client.json");
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
-    public String tpaNotificationStyle = "BOTH"; // TOAST, CHAT, BOTH
-
-    public boolean showToast() { return "TOAST".equals(tpaNotificationStyle) || "BOTH".equals(tpaNotificationStyle); }
-    public boolean showChat()  { return "CHAT".equals(tpaNotificationStyle) || "BOTH".equals(tpaNotificationStyle); }
-
     private static ClientConfig instance;
+    public String tpaNotificationStyle = "BOTH"; // TOAST, CHAT, BOTH
 
     public static ClientConfig get() {
         if (instance == null) instance = load();
@@ -41,11 +36,20 @@ public final class ClientConfig {
         return cfg;
     }
 
+    public boolean showToast() {
+        return "TOAST".equals(tpaNotificationStyle) || "BOTH".equals(tpaNotificationStyle);
+    }
+
+    public boolean showChat() {
+        return "CHAT".equals(tpaNotificationStyle) || "BOTH".equals(tpaNotificationStyle);
+    }
+
     public void save() {
         try {
             Files.createDirectories(FILE.getParent());
             Files.writeString(FILE, GSON.toJson(this), StandardCharsets.UTF_8);
-        } catch (IOException ignored) { }
+        } catch (IOException ignored) {
+        }
     }
 
     public void cycleStyle() {

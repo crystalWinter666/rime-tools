@@ -4,17 +4,13 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerPlayer;
 import org.rimecraft.rimetools.module.title.TitleModule;
-import org.rimecraft.rimetools.module.title.permission.TitlePermissions;
 import org.rimecraft.rimetools.module.title.permission.PermissionChecker;
+import org.rimecraft.rimetools.module.title.permission.TitlePermissions;
 import org.rimecraft.rimetools.module.title.storage.TitleRepository;
 import org.rimecraft.rimetools.module.title.title.TitleDefinition;
 import org.rimecraft.rimetools.module.title.title.TitleInputValidator;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public final class TitleNetworking {
@@ -149,7 +145,7 @@ public final class TitleNetworking {
     }
 
     private static TitlePayloads.TitlesResponse response(TitleRepository repository, ServerPlayer player,
-                                                                 List<TitlePayloads.PlayerTarget> playerTargets) {
+                                                         List<TitlePayloads.PlayerTarget> playerTargets) {
         repository.findVisibleTitle(player, TitleModule.permissionChecker());
         String selected = repository.state().selection(player.getUUID());
         boolean permissionsAvailable = TitleModule.permissionChecker().available();

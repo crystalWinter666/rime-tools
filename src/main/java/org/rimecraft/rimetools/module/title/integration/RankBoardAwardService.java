@@ -9,12 +9,7 @@ import org.slf4j.Logger;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class RankBoardAwardService {
     static final int WEEKLY_TOP_LIMIT = 5;
@@ -34,6 +29,69 @@ public final class RankBoardAwardService {
         this.monthlyConfig = config.monthlyRankAwards();
         this.logger = logger;
         rankBoard = (weeklyConfig.enabled() || monthlyConfig.enabled()) ? RankBoardAccess.create() : null;
+    }
+
+    static LocalDate weeklySettlementDate(ZonedDateTime now, TitleConfig.WeeklyRankAwards config) {
+        int daysSince = Math.floorMod(now.getDayOfWeek().getValue() - config.day().getValue(), 7);
+        LocalDate candidate = now.toLocalDate().minusDays(daysSince);
+        if (daysSince == 0 && now.toLocalTime().isBefore(config.time())) candidate = candidate.minusWeeks(1);
+        return candidate;
+    }
+
+    static LocalDate monthlySettlementDate(ZonedDateTime now, TitleConfig.MonthlyRankAwards config) {
+        LocalDate current = now.toLocalDate();
+        boolean beforeSettlementTime = current.getDayOfMonth() < config.dayOfMonth()
+                || (current.getDayOfMonth() == config.dayOfMonth() && now.toLocalTime().isBefore(config.time()));
+        return beforeSettlementTime ? current.minusMonths(1).withDayOfMonth(1) : current.withDayOfMonth(1);
+    }
+
+    static String weeklyTitleId(String metricId, int rank) {
+        return "weekly_" + metricId + "_t" + rank;
+    }
+
+    static String monthlyTitleId(String metricId, int rank) {
+        return "monthly_" + metricId + "_t" + rank;
+    }
+
+    static String weeklyDisplayName(String boardLabel, int rank) {
+        return "周" + boardLabel + "T" + rank;
+    }
+
+    static String monthlyDisplayName(LocalDate month, String boardLabel, int rank) {
+        return String.format(Locale.ROOT, "%d年%d月%sT%d",
+                month.getYear() % 100, month.getMonthValue(), boardLabel, rank);
+    }
+
+    static boolean weeklyGradientRank(int rank) {
+        return rank == 1;
+    }
+
+    static String weeklyTitleColor(String boardColor, int rank) {
+        return rank == 1 ? boardColor : "#FFD700";
+    }
+
+    static boolean monthlyGradientRank(int rank) {
+        return rank <= 3;
+    }
+
+    static String monthlyTitleColor(String boardColor, int rank) {
+        if (rank == 1) return boardColor;
+        if (rank <= 3) return "#FFD700";
+        return "#55FF55";
+    }
+
+    private static LocalDate parseDate(String value) {
+        try {
+            return value == null || value.isBlank() ? null : LocalDate.parse(value);
+        } catch (RuntimeException exception) {
+            return null;
+        }
+    }
+
+    private static Throwable rootCause(Throwable throwable) {
+        Throwable result = throwable;
+        while (result.getCause() != null && result.getCause() != result) result = result.getCause();
+        return result;
     }
 
     public boolean available() {
@@ -151,68 +209,5 @@ public final class RankBoardAwardService {
                     logger.info("Settled monthly RankBoard titles for {} to {}: {} boards, {} grants",
                             from, to, rankings.size(), grants);
                 }));
-    }
-
-    static LocalDate weeklySettlementDate(ZonedDateTime now, TitleConfig.WeeklyRankAwards config) {
-        int daysSince = Math.floorMod(now.getDayOfWeek().getValue() - config.day().getValue(), 7);
-        LocalDate candidate = now.toLocalDate().minusDays(daysSince);
-        if (daysSince == 0 && now.toLocalTime().isBefore(config.time())) candidate = candidate.minusWeeks(1);
-        return candidate;
-    }
-
-    static LocalDate monthlySettlementDate(ZonedDateTime now, TitleConfig.MonthlyRankAwards config) {
-        LocalDate current = now.toLocalDate();
-        boolean beforeSettlementTime = current.getDayOfMonth() < config.dayOfMonth()
-                || (current.getDayOfMonth() == config.dayOfMonth() && now.toLocalTime().isBefore(config.time()));
-        return beforeSettlementTime ? current.minusMonths(1).withDayOfMonth(1) : current.withDayOfMonth(1);
-    }
-
-    static String weeklyTitleId(String metricId, int rank) {
-        return "weekly_" + metricId + "_t" + rank;
-    }
-
-    static String monthlyTitleId(String metricId, int rank) {
-        return "monthly_" + metricId + "_t" + rank;
-    }
-
-    static String weeklyDisplayName(String boardLabel, int rank) {
-        return "周" + boardLabel + "T" + rank;
-    }
-
-    static String monthlyDisplayName(LocalDate month, String boardLabel, int rank) {
-        return String.format(Locale.ROOT, "%d年%d月%sT%d",
-                month.getYear() % 100, month.getMonthValue(), boardLabel, rank);
-    }
-
-        static boolean weeklyGradientRank(int rank) {
-        return rank == 1;
-    }
-
-    static String weeklyTitleColor(String boardColor, int rank) {
-        return rank == 1 ? boardColor : "#FFD700";
-    }
-
-        static boolean monthlyGradientRank(int rank) {
-        return rank <= 3;
-    }
-
-    static String monthlyTitleColor(String boardColor, int rank) {
-        if (rank == 1) return boardColor;
-        if (rank <= 3) return "#FFD700";
-        return "#55FF55";
-    }
-
-    private static LocalDate parseDate(String value) {
-        try {
-            return value == null || value.isBlank() ? null : LocalDate.parse(value);
-        } catch (RuntimeException exception) {
-            return null;
-        }
-    }
-
-    private static Throwable rootCause(Throwable throwable) {
-        Throwable result = throwable;
-        while (result.getCause() != null && result.getCause() != result) result = result.getCause();
-        return result;
     }
 }

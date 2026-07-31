@@ -42,6 +42,26 @@ public final class TitleEditorScreen extends Screen {
         this.draftWeight = existing == null ? "0" : Integer.toString(existing.weight());
     }
 
+    private static boolean validWeight(String value) {
+        try {
+            int weight = Integer.parseInt(value);
+            return weight >= -100_000 && weight <= 100_000;
+        } catch (NumberFormatException exception) {
+            return false;
+        }
+    }
+
+    private static int findColor(String color) {
+        for (int i = 0; i < COLORS.length; i++) {
+            if (COLORS[i].equalsIgnoreCase(color)) return i;
+        }
+        return 0;
+    }
+
+    private static int parseColor(String color) {
+        return Integer.parseInt(color.substring(1), 16);
+    }
+
     @Override
     protected void init() {
         Layout layout = layout();
@@ -281,26 +301,6 @@ public final class TitleEditorScreen extends Screen {
                 compact, panelY + headerHeight, fieldHeight, idX, nameX, identityWidth,
                 identityY, weightY, swatchesY, swatchWidth, swatchGap, swatchHeight,
                 toggleY, toggleHeight, buttonsY, buttonHeight);
-    }
-
-    private static boolean validWeight(String value) {
-        try {
-            int weight = Integer.parseInt(value);
-            return weight >= -100_000 && weight <= 100_000;
-        } catch (NumberFormatException exception) {
-            return false;
-        }
-    }
-
-    private static int findColor(String color) {
-        for (int i = 0; i < COLORS.length; i++) {
-            if (COLORS[i].equalsIgnoreCase(color)) return i;
-        }
-        return 0;
-    }
-
-    private static int parseColor(String color) {
-        return Integer.parseInt(color.substring(1), 16);
     }
 
     private record Layout(int panelX, int panelY, int panelWidth, int panelHeight,

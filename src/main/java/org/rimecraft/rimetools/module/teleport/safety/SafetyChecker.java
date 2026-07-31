@@ -77,5 +77,6 @@ public final class SafetyChecker {
         return (int) Math.floor(value);
     }
 
-    public record Result(boolean safe, String reason) { }
+    public record Result(boolean safe, String reason) {
+    }
 }

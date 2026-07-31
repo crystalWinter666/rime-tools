@@ -1,11 +1,10 @@
 package org.rimecraft.rimetools.module.teleport.network;
 
-import org.rimecraft.rimetools.RimeTools;
-
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import org.rimecraft.rimetools.RimeTools;
 import org.rimecraft.rimetools.module.teleport.model.FakePlayerInfo;
 import org.rimecraft.rimetools.module.teleport.model.Waypoint;
 
@@ -99,11 +98,6 @@ public record OpenWaypointScreenPayload(
         }
     };
 
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
-    }
-
     private static int readCount(FriendlyByteBuf buf, int maximum) {
         int count = buf.readVarInt();
         if (count < 0 || count > maximum) {
@@ -169,5 +163,10 @@ public record OpenWaypointScreenPayload(
         String creatorName = buf.readBoolean() ? buf.readUtf() : null;
         boolean ownedByViewer = buf.readBoolean();
         return new FakePlayerInfo(name, world, x, y, z, creatorName, ownedByViewer);
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

@@ -1,11 +1,10 @@
 package org.rimecraft.rimetools.module.teleport.network;
 
-import org.rimecraft.rimetools.RimeTools;
-
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import org.rimecraft.rimetools.RimeTools;
 
 public record TpaToastPayload(
         String senderName,
@@ -31,17 +30,24 @@ public record TpaToastPayload(
             buf.writeBoolean(payload.sent);
         }
     };
+    public static final int TYPE_TO_TARGET = 0;
+    public static final int TYPE_HERE = 1;
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
 
-    public static final int TYPE_TO_TARGET = 0;
-    public static final int TYPE_HERE = 1;
-
     // Avoid conflict with CustomPacketPayload.type()
-    public int requestType() { return requestType; }
-    public String senderName() { return senderName; }
-    public int timeoutSeconds() { return timeoutSeconds; }
+    public int requestType() {
+        return requestType;
+    }
+
+    public String senderName() {
+        return senderName;
+    }
+
+    public int timeoutSeconds() {
+        return timeoutSeconds;
+    }
 }

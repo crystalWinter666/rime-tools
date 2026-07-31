@@ -1,11 +1,10 @@
 package org.rimecraft.rimetools.module.teleport.network;
 
-import org.rimecraft.rimetools.RimeTools;
-
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import org.rimecraft.rimetools.RimeTools;
 
 import java.util.UUID;
 
@@ -54,12 +53,6 @@ public record WaypointActionPayload(
             buf.writeBoolean(payload.overwrite);
         }
     };
-
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
-    }
-
     // Action constants
     public static final int ACTION_TELEPORT = 0;
     public static final int ACTION_DELETE = 1;
@@ -67,14 +60,17 @@ public record WaypointActionPayload(
     public static final int ACTION_CREATE = 3;
     public static final int ACTION_REFRESH = 4;
     public static final int ACTION_TELEPORT_FAKE = 5;
-
     // Scope constants
     public static final int SCOPE_PERSONAL = 0;
     public static final int SCOPE_GLOBAL = 1;
     public static final int SCOPE_FAKE_PLAYER = 2;
-
     // Mode constants
     public static final int MODE_OWN = 0;
     public static final int MODE_ADMIN = 1;
     public static final int MODE_OTHER_READ_ONLY = 2;
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 }

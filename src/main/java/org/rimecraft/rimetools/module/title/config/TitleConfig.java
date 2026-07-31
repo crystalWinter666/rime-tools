@@ -20,13 +20,13 @@ import java.util.Properties;
 
 public record TitleConfig(String defaultTitle, String defaultColor,
                           WeeklyRankAwards weeklyRankAwards, MonthlyRankAwards monthlyRankAwards) {
-    private static final Logger LOGGER = LoggerFactory.getLogger("RIME Tools title module");
     public static final String DEFAULT_TITLE = "玩家";
     public static final String DEFAULT_COLOR = "#AAAAAA";
     public static final WeeklyRankAwards DEFAULT_WEEKLY_RANK_AWARDS = new WeeklyRankAwards(
             true, DayOfWeek.MONDAY, LocalTime.of(0, 5), ZoneId.of("Asia/Shanghai"));
     public static final MonthlyRankAwards DEFAULT_MONTHLY_RANK_AWARDS = new MonthlyRankAwards(
             true, 1, LocalTime.of(0, 5), ZoneId.of("Asia/Shanghai"));
+    private static final Logger LOGGER = LoggerFactory.getLogger("RIME Tools title module");
 
     public TitleConfig {
         if (!TitleInputValidator.isValidDisplayName(defaultTitle)) {
@@ -98,33 +98,6 @@ public record TitleConfig(String defaultTitle, String defaultColor,
                         zoneValue(properties.getProperty("monthly-rank-awards-zone"), ZoneId.of("Asia/Shanghai"))));
     }
 
-    public void save(Path path) throws IOException {
-        if (path.getParent() != null) {
-            Files.createDirectories(path.getParent());
-        }
-        Map<String, Object> root = new LinkedHashMap<>();
-        root.put("default-title", defaultTitle);
-        root.put("default-color", defaultColor);
-
-        Map<String, Object> weekly = new LinkedHashMap<>();
-        weekly.put("enabled", weeklyRankAwards.enabled());
-        weekly.put("day", weeklyRankAwards.day().name());
-        weekly.put("time", weeklyRankAwards.time().toString());
-        weekly.put("zone", weeklyRankAwards.zone().getId());
-        root.put("weekly-rank-awards", weekly);
-
-        Map<String, Object> monthly = new LinkedHashMap<>();
-        monthly.put("enabled", monthlyRankAwards.enabled());
-        monthly.put("day", monthlyRankAwards.dayOfMonth());
-        monthly.put("time", monthlyRankAwards.time().toString());
-        monthly.put("zone", monthlyRankAwards.zone().getId());
-        root.put("monthly-rank-awards", monthly);
-
-        try (Writer writer = Files.newBufferedWriter(path)) {
-            new Yaml().dump(root, writer);
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private static Map<String, Object> asMap(Object value) {
         return value instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.of();
@@ -192,6 +165,33 @@ public record TitleConfig(String defaultTitle, String defaultColor,
             return value == null ? fallback : ZoneId.of(value.trim());
         } catch (IllegalArgumentException exception) {
             return fallback;
+        }
+    }
+
+    public void save(Path path) throws IOException {
+        if (path.getParent() != null) {
+            Files.createDirectories(path.getParent());
+        }
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("default-title", defaultTitle);
+        root.put("default-color", defaultColor);
+
+        Map<String, Object> weekly = new LinkedHashMap<>();
+        weekly.put("enabled", weeklyRankAwards.enabled());
+        weekly.put("day", weeklyRankAwards.day().name());
+        weekly.put("time", weeklyRankAwards.time().toString());
+        weekly.put("zone", weeklyRankAwards.zone().getId());
+        root.put("weekly-rank-awards", weekly);
+
+        Map<String, Object> monthly = new LinkedHashMap<>();
+        monthly.put("enabled", monthlyRankAwards.enabled());
+        monthly.put("day", monthlyRankAwards.dayOfMonth());
+        monthly.put("time", monthlyRankAwards.time().toString());
+        monthly.put("zone", monthlyRankAwards.zone().getId());
+        root.put("monthly-rank-awards", monthly);
+
+        try (Writer writer = Files.newBufferedWriter(path)) {
+            new Yaml().dump(root, writer);
         }
     }
 

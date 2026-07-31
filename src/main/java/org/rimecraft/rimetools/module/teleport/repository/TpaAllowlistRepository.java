@@ -9,17 +9,12 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 public final class TpaAllowlistRepository {
-    private static final Type TYPE = new TypeToken<Map<String, Set<String>>>() { }.getType();
+    private static final Type TYPE = new TypeToken<Map<String, Set<String>>>() {
+    }.getType();
     private final Path file;
     private final Logger logger;
     private final Executor writer;
@@ -43,7 +38,8 @@ public final class TpaAllowlistRepository {
             Map<String, Set<String>> loaded = new HashMap<>();
             if (Files.exists(file)) {
                 loaded = gson.fromJson(Files.readString(file, StandardCharsets.UTF_8), TYPE);
-                if (loaded == null) throw new IllegalStateException("Allowlist file is empty or contains JSON null: " + file);
+                if (loaded == null)
+                    throw new IllegalStateException("Allowlist file is empty or contains JSON null: " + file);
             }
             Map<String, Set<String>> replacement = new HashMap<>();
             loaded.forEach((key, value) -> replacement.put(key, value == null ? new HashSet<>() : new HashSet<>(value)));

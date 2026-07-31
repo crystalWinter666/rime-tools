@@ -10,6 +10,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ConfirmManagerTest {
+    private static ConfirmManager.PendingTeleport pending(UUID playerId, long expiresAtMillis) {
+        TeleportPosition destination = new TeleportPosition("world", 1, 64, 2, 0, 0);
+        return new ConfirmManager.PendingTeleport(
+                playerId, destination, TeleportType.WAYPOINT_GLOBAL, expiresAtMillis);
+    }
+
     @Test
     void pendingTeleportCanOnlyBeTakenOnce() {
         ConfirmManager manager = new ConfirmManager();
@@ -30,11 +36,5 @@ class ConfirmManagerTest {
 
         assertNull(manager.take(playerId));
         assertNull(manager.get(playerId));
-    }
-
-    private static ConfirmManager.PendingTeleport pending(UUID playerId, long expiresAtMillis) {
-        TeleportPosition destination = new TeleportPosition("world", 1, 64, 2, 0, 0);
-        return new ConfirmManager.PendingTeleport(
-                playerId, destination, TeleportType.WAYPOINT_GLOBAL, expiresAtMillis);
     }
 }

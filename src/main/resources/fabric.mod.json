@@ -4,7 +4,9 @@
   "version": "${version}",
   "name": "RIME 雾凇 服务器工具",
   "description": "Modular teleport and player title tools for Fabric servers.",
-  "authors": ["QianMo0721"],
+  "authors": [
+    "QianMo0721"
+  ],
   "contact": {},
   "license": "All-Rights-Reserved",
   "environment": "*",

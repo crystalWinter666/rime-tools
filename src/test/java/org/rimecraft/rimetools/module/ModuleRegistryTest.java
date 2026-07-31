@@ -4,28 +4,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ModuleRegistryTest {
-    private static final class FakeModule implements RimeModule {
-        private final String id;
-
-        FakeModule(String id) {
-            this.id = id;
-        }
-
-        @Override
-        public String id() {
-            return id;
-        }
-
-        @Override
-        public void initialize(RimeModuleContext context) {
-        }
-    }
-
     @Test
     void registersAndListsModules() {
         ModuleRegistry registry = new ModuleRegistry();
@@ -61,5 +42,22 @@ class ModuleRegistryTest {
         registry.register(new FakeModule("b"));
         assertEquals(1, snapshot.size());
         assertThrows(UnsupportedOperationException.class, () -> snapshot.clear());
+    }
+
+    private static final class FakeModule implements RimeModule {
+        private final String id;
+
+        FakeModule(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public String id() {
+            return id;
+        }
+
+        @Override
+        public void initialize(RimeModuleContext context) {
+        }
     }
 }

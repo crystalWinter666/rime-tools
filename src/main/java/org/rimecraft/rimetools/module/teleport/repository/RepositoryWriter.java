@@ -29,7 +29,8 @@ public final class RepositoryWriter implements Executor, AutoCloseable {
 
     public void flush() {
         try {
-            executor.submit(() -> { }).get(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            executor.submit(() -> {
+            }).get(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (Exception exception) {
             throw new IllegalStateException("Timed out while flushing RIME Tools storage", exception);
         }

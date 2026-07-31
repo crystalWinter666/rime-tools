@@ -22,6 +22,11 @@ public final class ModuleSwitcher {
         this.currentId = currentId;
     }
 
+    private static Component trim(Font font, Component value, int maxWidth) {
+        if (font.width(value) <= maxWidth) return value;
+        return Component.literal(font.plainSubstrByWidth(value.getString(), Math.max(0, maxWidth - 8)) + "...");
+    }
+
     public void setBounds(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
@@ -94,10 +99,5 @@ public final class ModuleSwitcher {
 
     public int left() {
         return x;
-    }
-
-    private static Component trim(Font font, Component value, int maxWidth) {
-        if (font.width(value) <= maxWidth) return value;
-        return Component.literal(font.plainSubstrByWidth(value.getString(), Math.max(0, maxWidth - 8)) + "...");
     }
 }

@@ -3,13 +3,11 @@ package org.rimecraft.rimetools.module.title.storage;
 import org.junit.jupiter.api.Test;
 import org.rimecraft.rimetools.module.title.title.TitleDefinition;
 
-import java.util.UUID;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TitleStateTest {
     @Test

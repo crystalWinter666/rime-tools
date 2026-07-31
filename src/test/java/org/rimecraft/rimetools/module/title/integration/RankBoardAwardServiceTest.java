@@ -3,11 +3,7 @@ package org.rimecraft.rimetools.module.title.integration;
 import org.junit.jupiter.api.Test;
 import org.rimecraft.rimetools.module.title.config.TitleConfig;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

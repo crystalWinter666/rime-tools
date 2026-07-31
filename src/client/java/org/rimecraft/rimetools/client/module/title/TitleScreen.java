@@ -19,11 +19,6 @@ import java.util.Locale;
 public final class TitleScreen extends Screen {
     private static final int SCROLL_BAR_WIDTH = 4;
     private static final int PLAYER_ROW_HEIGHT = 32;
-
-    private enum View {
-        PLAYER, TITLES, ASSIGN
-    }
-
     private final Screen parent;
     private final ModuleSwitcher moduleSwitcher = new ModuleSwitcher(TitleModule.ID);
     private final List<TitlePayloads.TitleEntry> titles = new ArrayList<>();
@@ -52,10 +47,28 @@ public final class TitleScreen extends Screen {
     private AbstractButton primaryButton;
     private AbstractButton secondaryButton;
     private AbstractButton dangerButton;
-
     public TitleScreen(Screen parent) {
         super(Component.translatable("rime-tools.title.screen.title"));
         this.parent = parent;
+    }
+
+    private static int color(String value) {
+        try {
+            return Integer.parseInt(value.substring(1), 16);
+        } catch (RuntimeException exception) {
+            return 0xAAAAAA;
+        }
+    }
+
+    private static boolean isValidPlayerTarget(String value) {
+        String target = value.trim();
+        if (target.matches("[A-Za-z0-9_]{1,16}")) return true;
+        try {
+            java.util.UUID.fromString(target);
+            return true;
+        } catch (IllegalArgumentException exception) {
+            return false;
+        }
     }
 
     @Override
@@ -282,8 +295,8 @@ public final class TitleScreen extends Screen {
             status = titles.isEmpty()
                     ? Component.translatable("rime-tools.title.status.empty")
                     : capabilities.permissionsAvailable()
-                    ? Component.translatable("rime-tools.title.status.ready")
-                    : Component.translatable("rime-tools.title.status.permissions_unavailable");
+                      ? Component.translatable("rime-tools.title.status.ready")
+                      : Component.translatable("rime-tools.title.status.permissions_unavailable");
             statusColor = RimeUi.MUTED;
         }
         scrollOffset = Math.clamp(scrollOffset, 0, maxScroll(layout()));
@@ -750,23 +763,8 @@ public final class TitleScreen extends Screen {
                 listTop, listHeight, footerY, buttonY, buttonHeight, entryHeight);
     }
 
-    private static int color(String value) {
-        try {
-            return Integer.parseInt(value.substring(1), 16);
-        } catch (RuntimeException exception) {
-            return 0xAAAAAA;
-        }
-    }
-
-    private static boolean isValidPlayerTarget(String value) {
-        String target = value.trim();
-        if (target.matches("[A-Za-z0-9_]{1,16}")) return true;
-        try {
-            java.util.UUID.fromString(target);
-            return true;
-        } catch (IllegalArgumentException exception) {
-            return false;
-        }
+    private enum View {
+        PLAYER, TITLES, ASSIGN
     }
 
     private record TitleHit(TitlePayloads.TitleEntry title) {

@@ -139,5 +139,5 @@ public final class TeleportService {
         return Result.PENDING_CONFIRM;
     }
 
-    public enum Result { SUCCESS, FAILED, PENDING_CONFIRM }
+    public enum Result {SUCCESS, FAILED, PENDING_CONFIRM}
 }

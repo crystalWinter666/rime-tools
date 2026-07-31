@@ -6,7 +6,8 @@ import java.util.regex.Pattern;
 public final class NameValidator {
     private static final Pattern ASCII_ALLOWED = Pattern.compile("^[A-Za-z0-9_-]+$");
 
-    private NameValidator() { }
+    private NameValidator() {
+    }
 
     public static String normalize(String name) {
         return name == null ? "" : name.trim();

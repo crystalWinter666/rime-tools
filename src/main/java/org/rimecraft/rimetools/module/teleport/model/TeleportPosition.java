@@ -15,6 +15,10 @@ public record TeleportPosition(String world, double x, double y, double z, float
                 player.getYRot(), player.getXRot());
     }
 
+    public static String worldName(ServerLevel level) {
+        return TeleportConfig.normalizeWorld(level.dimension().identifier().toString());
+    }
+
     public ServerLevel resolve(MinecraftServer server) {
         String normalized = TeleportConfig.normalizeWorld(world);
         ResourceKey<Level> key = switch (normalized.toLowerCase(java.util.Locale.ROOT)) {
@@ -24,10 +28,6 @@ public record TeleportPosition(String world, double x, double y, double z, float
             default -> ResourceKey.create(Registries.DIMENSION, Identifier.parse(world));
         };
         return server.getLevel(key);
-    }
-
-    public static String worldName(ServerLevel level) {
-        return TeleportConfig.normalizeWorld(level.dimension().identifier().toString());
     }
 
     public double distanceTo(TeleportPosition other) {

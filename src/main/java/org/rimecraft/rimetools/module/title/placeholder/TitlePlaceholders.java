@@ -1,12 +1,11 @@
 package org.rimecraft.rimetools.module.title.placeholder;
 
-import org.rimecraft.rimetools.RimeTools;
-
 import eu.pb4.placeholders.api.PlaceholderResult;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.ServerPlaceholderContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.rimecraft.rimetools.RimeTools;
 import org.rimecraft.rimetools.module.title.TitleModule;
 import org.rimecraft.rimetools.module.title.chat.TitleChatFormatter;
 import org.rimecraft.rimetools.module.title.storage.TitleRepository;

@@ -40,21 +40,65 @@ public final class Waypoint {
         this.updatedAt = updatedAt;
     }
 
-    public String getName() { return name; }
-    public String getWorld() { return world; }
-    public double getX() { return x; }
-    public double getY() { return y; }
-    public double getZ() { return z; }
-    public float getYaw() { return yaw; }
-    public float getPitch() { return pitch; }
-    public String getAlias() { return alias; }
-    public String getDescription() { return description; }
-    public UUID getOwner() { return owner; }
-    public long getCreatedAt() { return createdAt; }
-    public long getUpdatedAt() { return updatedAt; }
-    public void setAlias(String alias) { this.alias = alias; }
-    public void setDescription(String description) { this.description = description; }
-    public void setUpdatedAt(long updatedAt) { this.updatedAt = updatedAt; }
+    public String getName() {
+        return name;
+    }
+
+    public String getWorld() {
+        return world;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public double getZ() {
+        return z;
+    }
+
+    public float getYaw() {
+        return yaw;
+    }
+
+    public float getPitch() {
+        return pitch;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public UUID getOwner() {
+        return owner;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public long getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(long updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
     public TeleportPosition position() {
         return new TeleportPosition(world, x, y, z, yaw, pitch);

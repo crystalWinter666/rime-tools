@@ -1,20 +1,15 @@
 package org.rimecraft.rimetools.module.teleport.integration;
 
-import org.rimecraft.rimetools.RimeTools;
-
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.phys.Vec3;
+import org.rimecraft.rimetools.RimeTools;
 import org.rimecraft.rimetools.module.teleport.config.TeleportConfig;
 import org.rimecraft.rimetools.module.teleport.model.FakePlayerInfo;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public final class CarpetPermBridge {
 

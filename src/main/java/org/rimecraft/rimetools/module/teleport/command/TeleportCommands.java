@@ -1,23 +1,20 @@
 package org.rimecraft.rimetools.module.teleport.command;
 
-import org.rimecraft.rimetools.RimeTools;
-
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import org.rimecraft.rimetools.RimeTools;
 import org.rimecraft.rimetools.module.teleport.TeleportModule;
-import org.rimecraft.rimetools.module.teleport.config.TeleportConfig;
 import org.rimecraft.rimetools.module.teleport.i18n.MessageService;
 import org.rimecraft.rimetools.module.teleport.importer.StpImporter;
 import org.rimecraft.rimetools.module.teleport.manager.ConfirmManager;
@@ -26,8 +23,8 @@ import org.rimecraft.rimetools.module.teleport.model.OfflinePosition;
 import org.rimecraft.rimetools.module.teleport.model.TeleportPosition;
 import org.rimecraft.rimetools.module.teleport.model.Waypoint;
 import org.rimecraft.rimetools.module.teleport.network.TeleportNetworking;
-import org.rimecraft.rimetools.module.teleport.network.TpaToastPayload;
 import org.rimecraft.rimetools.module.teleport.network.TpaResultPayload;
+import org.rimecraft.rimetools.module.teleport.network.TpaToastPayload;
 import org.rimecraft.rimetools.module.teleport.teleport.TeleportService;
 import org.rimecraft.rimetools.module.teleport.teleport.TeleportType;
 import org.rimecraft.rimetools.module.teleport.util.NameValidator;
@@ -36,15 +33,7 @@ import org.rimecraft.rimetools.module.teleport.util.Permissions;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public final class TeleportCommands {
@@ -109,7 +98,10 @@ public final class TeleportCommands {
         String[] args = split(raw);
         if (args.length == 0) {
             ServerPlayer p = source.getPlayer();
-            if (p != null) { sendOpenScreen(p, 0, null, null); return 1; }
+            if (p != null) {
+                sendOpenScreen(p, 0, null, null);
+                return 1;
+            }
             mod.messages().send(source, "help.header");
             return 1;
         }
@@ -154,7 +146,8 @@ public final class TeleportCommands {
             case "gui" -> openGui(source);
             case "manage" -> managePlayer(source, args);
             case "testwp" -> testWaypoint(source, args);
-            default -> mod.config().easyTp && args.length == 1 ? easyTeleport(source, args[0]) : message(source, "help.header");
+            default ->
+                    mod.config().easyTp && args.length == 1 ? easyTeleport(source, args[0]) : message(source, "help.header");
         };
     }
 
@@ -193,7 +186,10 @@ public final class TeleportCommands {
         ServerPlayer player = player(source);
         if (player == null) return 0;
         if (!Permissions.has(player, personal ? "personal.tp" : "global.tp", true)) return denied(source);
-        if (args.length < 2) { sendOpenScreen(player, 0, null, null); return 1; }
+        if (args.length < 2) {
+            sendOpenScreen(player, 0, null, null);
+            return 1;
+        }
         Waypoint waypoint = personal ? mod.waypoints().getPersonal(player.getUUID(), args[1]) : mod.waypoints().getGlobal(args[1]);
         if (waypoint == null) return message(source, "waypoint.not_found", "name", args[1]);
         TeleportService.Result result = mod.teleports().teleport(player, waypoint.position(),
@@ -307,7 +303,8 @@ public final class TeleportCommands {
         if (target.getUUID().equals(player.getUUID())) return message(source, "tpa.self");
         TeleportPosition from = TeleportPosition.from(player);
         TeleportPosition destination = TeleportPosition.from(target);
-        if (!mod.config().isWorldAllowed(destination.world())) return message(source, "world.not_allowed_target", "world", destination.world());
+        if (!mod.config().isWorldAllowed(destination.world()))
+            return message(source, "world.not_allowed_target", "world", destination.world());
         if (!from.world().equalsIgnoreCase(destination.world()) && !Permissions.has(player, "crossworld", false)) {
             return message(source, "world.crossworld_denied", "world", destination.world());
         }
@@ -344,7 +341,8 @@ public final class TeleportCommands {
         message(source, "tpa.cancelled");
         for (TpaManager.TpaRequest request : removed) {
             ServerPlayer target = mod.server().getPlayerList().getPlayer(request.targetId());
-            if (target != null) mod.messages().send(target, "tpa.cancelled_target", MessageService.vars("player", player.getName().getString()));
+            if (target != null)
+                mod.messages().send(target, "tpa.cancelled_target", MessageService.vars("player", player.getName().getString()));
         }
         return 1;
     }
@@ -376,7 +374,8 @@ public final class TeleportCommands {
         if (request == null) return message(source, "tpa.none");
         mod.tpa().remove(request);
         ServerPlayer sender = mod.server().getPlayerList().getPlayer(request.senderId());
-        if (sender != null) mod.messages().send(sender, "tpa.denied", MessageService.vars("player", target.getName().getString()));
+        if (sender != null)
+            mod.messages().send(sender, "tpa.denied", MessageService.vars("player", target.getName().getString()));
         if (sender != null) {
             ServerPlayNetworking.send(target, new TpaResultPayload(sender.getName().getString(), false));
             ServerPlayNetworking.send(sender, new TpaResultPayload(target.getName().getString(), false));
@@ -536,7 +535,8 @@ public final class TeleportCommands {
         if (!NameValidator.isValid(name, mod.config().waypointNameMaxLength, mod.config().allowUnicodeNames)) {
             return message(source, "waypoint.invalid_name", "max", mod.config().waypointNameMaxLength);
         }
-        if (mod.waypoints().getPersonal(player.getUUID(), name) != null) return teleportWaypoint(source, new String[]{"tpp", name}, true);
+        if (mod.waypoints().getPersonal(player.getUUID(), name) != null)
+            return teleportWaypoint(source, new String[]{"tpp", name}, true);
         if (mod.waypoints().getGlobal(name) != null) return teleportWaypoint(source, new String[]{"tpg", name}, false);
         ServerPlayer target = findPlayer(name);
         if (target != null) {
@@ -552,12 +552,12 @@ public final class TeleportCommands {
     }
 
     private CompletableFuture<Suggestions> suggestShortcut(String prepend, CommandContext<CommandSourceStack> context,
-                                                            SuggestionsBuilder builder) {
+                                                           SuggestionsBuilder builder) {
         return suggestFor(prepend + " ", context, builder);
     }
 
     private CompletableFuture<Suggestions> suggestFor(String prepend, CommandContext<CommandSourceStack> context,
-                                                       SuggestionsBuilder builder) {
+                                                      SuggestionsBuilder builder) {
         String raw = prepend + builder.getRemaining();
         String[] args = split(raw);
         boolean first = args.length <= 1 && !raw.endsWith(" ");
@@ -589,15 +589,19 @@ public final class TeleportCommands {
                                     .forEach(waypoint -> values.add(waypoint.getName()));
                         }
                     }
-                    case "tpadisallow" -> mod.allowlist().list(player.getUUID()).forEach(uuid -> values.add(uuid.toString()));
-                    case "accept", "allow", "deny", "reject" -> mod.tpa().forTarget(player.getUUID()).forEach(request -> {
-                        ServerPlayer sender = mod.server().getPlayerList().getPlayer(request.senderId());
-                        if (sender != null) values.add(sender.getName().getString());
-                    });
-                    case "importstp" -> values.addAll(List.of("--include-back", "--clear", "--offline-uuid", "--raw-uuid", "--auto-uuid"));
+                    case "tpadisallow" ->
+                            mod.allowlist().list(player.getUUID()).forEach(uuid -> values.add(uuid.toString()));
+                    case "accept", "allow", "deny", "reject" ->
+                            mod.tpa().forTarget(player.getUUID()).forEach(request -> {
+                                ServerPlayer sender = mod.server().getPlayerList().getPlayer(request.senderId());
+                                if (sender != null) values.add(sender.getName().getString());
+                            });
+                    case "importstp" ->
+                            values.addAll(List.of("--include-back", "--clear", "--offline-uuid", "--raw-uuid", "--auto-uuid"));
                     case "manage" ->
                             mod.server().getPlayerList().getPlayers().forEach(online -> values.add(online.getName().getString()));
-                    default -> { }
+                    default -> {
+                    }
                 }
             }
         }
@@ -621,7 +625,7 @@ public final class TeleportCommands {
         TeleportPosition pos = TeleportPosition.from(player);
         Waypoint wp = new Waypoint(name, pos.world(), pos.x(), pos.y(), pos.z(),
                 pos.yaw(), pos.pitch(), "dev test waypoint", player.getUUID(), now, now);
-        
+
         mod.waypoints().setGlobal(wp);
         message(source, "waypoint.created", "name", name);
         sendOpenScreen(player, 0, null, null);

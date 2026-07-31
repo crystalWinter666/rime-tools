@@ -11,17 +11,12 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-import java.util.Comparator;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 public final class OfflinePositionRepository {
-    private static final Type DATA_TYPE = new TypeToken<Map<String, OfflinePosition>>() { }.getType();
+    private static final Type DATA_TYPE = new TypeToken<Map<String, OfflinePosition>>() {
+    }.getType();
 
     private final Path file;
     private final Logger logger;
@@ -58,7 +53,8 @@ public final class OfflinePositionRepository {
             if (Files.exists(file)) {
                 loaded = gson.fromJson(
                         Files.readString(file, StandardCharsets.UTF_8), DATA_TYPE);
-                if (loaded == null) throw new IllegalStateException("Offline position file is empty or contains JSON null: " + file);
+                if (loaded == null)
+                    throw new IllegalStateException("Offline position file is empty or contains JSON null: " + file);
             }
             positions.clear();
             loaded.forEach((key, value) -> {
@@ -121,20 +117,17 @@ public final class OfflinePositionRepository {
                         Comparator.comparingLong(OfflinePosition::updatedAt)).reversed())
                 .limit(listLimit == 0 ? Long.MAX_VALUE : listLimit)
                 .forEach(entry -> {
-            String id = entry.getKey();
-            OfflinePosition position = entry.getValue();
-            try {
-                if (position != null && position.playerName() != null && !position.playerName().isBlank()) {
-                    result.add(new KnownPlayer(UUID.fromString(id), position.playerName()));
-                }
-            } catch (IllegalArgumentException ignored) {
-            }
-        });
+                    String id = entry.getKey();
+                    OfflinePosition position = entry.getValue();
+                    try {
+                        if (position != null && position.playerName() != null && !position.playerName().isBlank()) {
+                            result.add(new KnownPlayer(UUID.fromString(id), position.playerName()));
+                        }
+                    } catch (IllegalArgumentException ignored) {
+                    }
+                });
         result.sort(java.util.Comparator.comparing(KnownPlayer::name, String.CASE_INSENSITIVE_ORDER));
         return result;
-    }
-
-    public record KnownPlayer(UUID id, String name) {
     }
 
     private void scheduleSave() {
@@ -191,5 +184,8 @@ public final class OfflinePositionRepository {
                 return;
             }
         }
+    }
+
+    public record KnownPlayer(UUID id, String name) {
     }
 }

@@ -7,10 +7,10 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.types.PermissionNode;
 import net.luckperms.api.util.Tristate;
 
-import java.util.UUID;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public final class LuckPermsTitleAccess implements PermissionChecker {
@@ -92,7 +92,7 @@ public final class LuckPermsTitleAccess implements PermissionChecker {
 
     @Override
     public CompletableFuture<Boolean> replaceManagedGrants(Set<String> titleIds,
-                                                            Map<UUID, Set<String>> grants) {
+                                                           Map<UUID, Set<String>> grants) {
         List<CompletableFuture<Boolean>> updates = grants.entrySet().stream()
                 .map(entry -> luckPerms.getUserManager().loadUser(entry.getKey())
                         .thenCompose(user -> replaceManagedGrants(user, titleIds, entry.getValue()))
@@ -114,7 +114,7 @@ public final class LuckPermsTitleAccess implements PermissionChecker {
     }
 
     private CompletableFuture<Boolean> replaceManagedGrants(User user, Set<String> titleIds,
-                                                             Set<String> desiredTitleIds) {
+                                                            Set<String> desiredTitleIds) {
         if (user == null) return CompletableFuture.completedFuture(false);
         titleIds.forEach(titleId -> user.data().remove(permissionNode(titleId)));
         desiredTitleIds.forEach(titleId -> user.data().add(permissionNode(titleId)));

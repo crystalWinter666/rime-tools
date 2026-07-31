@@ -104,14 +104,6 @@ public final class TeleportConfig {
         }
     }
 
-    public boolean isWorldAllowed(String worldName) {
-        if (worlds.isEmpty()) {
-            return true;
-        }
-        String normalized = normalizeWorld(worldName);
-        return worlds.stream().map(TeleportConfig::normalizeWorld).anyMatch(normalized::equalsIgnoreCase);
-    }
-
     public static String normalizeWorld(String world) {
         if (world == null) {
             return "";
@@ -209,19 +201,43 @@ public final class TeleportConfig {
         }
     }
 
-    public enum DuplicatePolicy { REJECT, REPLACE }
-    public enum CrossworldMode { FIXED_DISTANCE, EXTRA_COST }
-    public enum Rounding { CEIL, FLOOR, ROUND }
-    public enum SafetyMode { CONFIRM, NEARBY_SAFE }
-    public enum NearbyFallback { CONFIRM, DENY }
+    public boolean isWorldAllowed(String worldName) {
+        if (worlds.isEmpty()) {
+            return true;
+        }
+        String normalized = normalizeWorld(worldName);
+        return worlds.stream().map(TeleportConfig::normalizeWorld).anyMatch(normalized::equalsIgnoreCase);
+    }
 
-    public record CooldownConfig(int waypointSeconds, int tpSeconds, int backSeconds, int rtpSeconds) { }
-    public record ExpCost(boolean enabled, int base, double perBlock) { }
-    public record ItemCost(boolean enabled, String itemId, int customModelData, int base, double perBlock) { }
-    public record CrossworldCost(CrossworldMode mode, double distance, int extraCost) { }
-    public record CostConfig(ExpCost exp, ItemCost item, CrossworldCost crossworld, Rounding rounding) { }
+    public enum DuplicatePolicy {REJECT, REPLACE}
+
+    public enum CrossworldMode {FIXED_DISTANCE, EXTRA_COST}
+
+    public enum Rounding {CEIL, FLOOR, ROUND}
+
+    public enum SafetyMode {CONFIRM, NEARBY_SAFE}
+
+    public enum NearbyFallback {CONFIRM, DENY}
+
+    public record CooldownConfig(int waypointSeconds, int tpSeconds, int backSeconds, int rtpSeconds) {
+    }
+
+    public record ExpCost(boolean enabled, int base, double perBlock) {
+    }
+
+    public record ItemCost(boolean enabled, String itemId, int customModelData, int base, double perBlock) {
+    }
+
+    public record CrossworldCost(CrossworldMode mode, double distance, int extraCost) {
+    }
+
+    public record CostConfig(ExpCost exp, ItemCost item, CrossworldCost crossworld, Rounding rounding) {
+    }
+
     public record SafetyConfig(boolean enabled, SafetyMode mode, int searchRadius, int searchVertical,
-                               NearbyFallback nearbyFallback, boolean disallowWater, int minY) { }
+                               NearbyFallback nearbyFallback, boolean disallowWater, int minY) {
+    }
+
     public record RandomTeleportConfig(boolean enabled, int minRadius, int maxRadius, int maxAttempts,
                                        int maxConcurrentSearches) {
         public RandomTeleportConfig {
@@ -231,5 +247,7 @@ public final class TeleportConfig {
             maxConcurrentSearches = Math.clamp(maxConcurrentSearches, 1, 16);
         }
     }
-    public record CommandsConfig(boolean overrideTp) { }
+
+    public record CommandsConfig(boolean overrideTp) {
+    }
 }
