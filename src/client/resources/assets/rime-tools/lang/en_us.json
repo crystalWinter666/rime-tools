@@ -22,7 +22,7 @@
   "rime-tools.teleport.screen.waypoints.no_results": "No matching results",
   "rime-tools.teleport.screen.waypoints.no_results_hint": "Try another search term",
   "rime-tools.teleport.screen.waypoints.no_fake_players": "No fake players online",
-  "rime-tools.teleport.screen.waypoints.no_fake_players_hint": "CarpetPerm reports no active fake players",
+  "rime-tools.teleport.screen.waypoints.no_fake_players_hint": "Carpet reports no active fake players",
   "rime-tools.teleport.screen.waypoints.teleport": "Teleport",
   "rime-tools.teleport.screen.waypoints.teleport_fake": "Teleport to your fake player",
   "rime-tools.teleport.screen.waypoints.fake_locked": "Only the creator can teleport",

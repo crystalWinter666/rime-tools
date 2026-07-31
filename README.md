@@ -321,11 +321,10 @@ README 由 AI 生成。
 
 ## 依赖
 
-- Fabric Loader、Fabric API、Placeholder API：必需
-- LuckPerms：启用头衔选择与管理
+- Fabric Loader、Fabric API、Placeholder API、Carpet：必需
+- LuckPerms：启用头衔选择与管理，以及 Carpet 命令权限节点
 - RankBoard：启用周榜与月榜排行榜头衔结算
 - Mod Menu：提供头衔管理界面入口
-- CarpetPerm：提供假玩家传送集成
 
 ## 构建
 

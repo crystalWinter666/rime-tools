@@ -22,19 +22,23 @@
     ]
   },
   "mixins": [
-    "rime-tools.mixins.json"
+    "rime-tools.mixins.json",
+    {
+      "config": "rime-tools-carpet.mixins.json",
+      "environment": "server"
+    }
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
     "minecraft": "${minecraft_version}",
     "placeholder-api": ">=3.1.0-beta.1",
+    "carpet": ">=26.2",
     "java": ">=25"
   },
   "suggests": {
     "luckperms": "*",
     "rankboard": "*",
-    "modmenu": "*",
-    "carpetperm": "*"
+    "modmenu": "*"
   }
 }

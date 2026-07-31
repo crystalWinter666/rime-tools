@@ -47,6 +47,7 @@ public final class TitleScreen extends Screen {
     private AbstractButton primaryButton;
     private AbstractButton secondaryButton;
     private AbstractButton dangerButton;
+
     public TitleScreen(Screen parent) {
         super(Component.translatable("rime-tools.title.screen.title"));
         this.parent = parent;

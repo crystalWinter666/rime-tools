@@ -22,7 +22,7 @@
   "rime-tools.teleport.screen.waypoints.no_results": "没有匹配结果",
   "rime-tools.teleport.screen.waypoints.no_results_hint": "请尝试其他搜索词",
   "rime-tools.teleport.screen.waypoints.no_fake_players": "没有在线假人",
-  "rime-tools.teleport.screen.waypoints.no_fake_players_hint": "CarpetPerm 未返回活动假人",
+  "rime-tools.teleport.screen.waypoints.no_fake_players_hint": "Carpet 未返回活动假人",
   "rime-tools.teleport.screen.waypoints.teleport": "传送",
   "rime-tools.teleport.screen.waypoints.teleport_fake": "传送到你的假人",
   "rime-tools.teleport.screen.waypoints.fake_locked": "只有创建者可以传送",
