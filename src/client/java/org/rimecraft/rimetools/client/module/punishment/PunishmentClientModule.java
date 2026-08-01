@@ -2,10 +2,13 @@ package org.rimecraft.rimetools.client.module.punishment;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.rimecraft.rimetools.RimeTools;
 import org.rimecraft.rimetools.client.module.ClientModuleContext;
 import org.rimecraft.rimetools.client.module.RimeClientModule;
+import org.rimecraft.rimetools.client.ui.ClientGuiRegistry;
 import org.rimecraft.rimetools.module.punishment.PunishmentModule;
 import org.rimecraft.rimetools.module.punishment.network.MuteNoticePayload;
 
@@ -19,6 +22,10 @@ public final class PunishmentClientModule implements RimeClientModule {
 
     @Override
     public void initializeClient(ClientModuleContext context) {
+        ClientGuiRegistry.register(PunishmentModule.ID,
+                Component.translatable("rime-tools.module.punishment"),
+                () -> Minecraft.getInstance().setScreenAndShow(new PunishmentScreen(null)));
+        PunishmentClientNetworking.register();
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath(RimeTools.MOD_ID, "mute_notice"), muteToast);
         ClientPlayNetworking.registerGlobalReceiver(MuteNoticePayload.TYPE,

@@ -229,39 +229,55 @@ RankBoard 不可用时自动禁用结算并在日志中提示。
 
 ## 聊天模块
 
-内置聊天防刷屏：玩家在配置的统计窗口内发送超过阈值的消息时，会被**禁言**（默认，
-`mute_seconds` 后自动恢复）或**踢出**（`action: KICK`）。配置位于
-`config/rime-tools/chat.yml`：
+聊天模块提供统一的发送者装饰与防滥用治理。频率超限或在短时间内重复发送相同/相似消息时，
+可自动**警告**、**禁言**（默认）或**踢出**；自动处罚经惩罚模块持久化审计。配置位于
+`config/rime-tools/chat.yml`，旧配置启动时会自动补齐新字段：
 
-- `anti_spam.enabled`：开关，默认 `true`
-- `anti_spam.window_seconds`：统计窗口（秒），默认 `5`
-- `anti_spam.max_messages`：窗口内消息数上限，默认 `6`
-- `anti_spam.action`：`MUTE`（禁言，默认）或 `KICK`（踢出）
-- `anti_spam.mute_seconds`：禁言时长（秒），默认 `60`
+- `anti_spam.enabled`、`window_seconds`、`max_messages`：频率检测开关、窗口和阈值
+- `anti_spam.action`：`WARN` / `MUTE`（默认）/ `KICK`
+- `anti_spam.mute_seconds`、`state_retention_seconds`：自动禁言时长与闲置追踪状态保留时间
+- `anti_spam.duplicate_detection`：相似消息检测开关、窗口、重复阈值与 `similarity_threshold`
+- `message_rules.max_length`、`strip_formatting`：消息长度上限与旧式 `§` 格式码拦截
+- `mute_interception.blocked_commands`：禁言期间拦截的私聊/团队通信命令，默认包含
+  `msg`、`tell`、`w`、`teammsg`、`tm`
+- `mute_interception.allowed_commands`：禁言期间明确允许的管理命令
 
-聊天发送者名称的前缀装饰由各模块注册到聊天模块统一处理（例如头衔模块把
-`[ 头衔 ]` 加到名字前）。
+拥有 `rime-tools:chat/bypass` 的玩家可绕过聊天治理规则。聊天发送者名称的前缀装饰仍由各模块
+注册到聊天模块统一处理（例如头衔模块把 `[ 头衔 ]` 加到名字前）。
 
 ## 惩罚模块
 
-提供临时/永久封禁、临时禁言、踢出（覆盖原版 `/kick`）、清榜与违规记录。
-所有操作都需要权限节点 `rime-tools:punish`（默认仅管理员）。违规记录持久化在
-`config/rime-tools/punishment/punishments.json`，重启后仍生效。
+提供警告、临时/永久封禁、临时/永久禁言、踢出（覆盖原版 `/kick`）、清榜与违规审计。
+原有权限 `rime-tools:punish` 仍是总管理权限；也可细分授予 `punish/apply`、`punish/revoke`、
+`punish/history`、`punish/clearrank` 与 `punish/reload`。违规记录持久化在
+`config/rime-tools/punishment/punishments.json`；旧数组格式会自动迁移为带版本、稳定记录 ID、
+状态与撤销元数据的 v2 格式，撤销和到期均不会删除审计历史。
+
+配置位于 `config/rime-tools/punishment.yml`：
+
+- `announce_punishments`：处罚是否向除执行者外的全服玩家广播，默认 `true`
+- `history_page_size`：命令与管理界面的每页历史条数，范围 5–50，默认 `10`
+- `mute_notice_cooldown_seconds`：禁言文本提示的最短间隔，默认 `3`
 
 | 命令 | 说明 |
 | --- | --- |
+| `/punish warn <玩家> [原因]` | 警告玩家并写入审计记录 |
 | `/punish ban <玩家> [原因]` | 永久封禁，在线玩家立即被踢出 |
 | `/punish tempban <玩家> <时长> [原因]` | 临时封禁；时长支持 `30m` / `2h` / `7d` / 纯秒 |
 | `/punish mute <玩家> <时长> [原因]` | 临时禁言 |
+| `/punish permmute <玩家> [原因]` | 永久禁言 |
 | `/punish kick <玩家> [原因]` | 踢出并记录违规（`/kick` 已覆盖为同等行为） |
 | `/punish clearrank <玩家> week\|month` | 清榜：删除该玩家 stats 文件并触发 RankBoard 缓存重载，从当前与未来榜单移除 |
-| `/punish unban <玩家>` / `/punish unmute <玩家>` | 解除封禁 / 禁言 |
-| `/punish list [玩家]` | 查看违规记录（本人无需权限，查他人需管理权限） |
+| `/punish unban <玩家>` / `/punish unmute <玩家>` | 撤销该玩家所有对应的生效记录 |
+| `/punish revoke <记录 UUID> [原因]` | 精确撤销一条生效记录并保留审计信息 |
+| `/punish list [玩家] [页码]` | 分页查看违规记录（本人无需权限，查他人需管理权限） |
+| `/punish reload` | 热重载并规范化聊天与惩罚配置 |
 
 行为说明：
 
 - 被临时封禁的玩家登录时会被拒绝并显示剩余时间；永久封禁显示原因。
-- 被禁言的玩家发送聊天消息会被拦截，并弹出提示条（客户端 HUD）告知剩余禁言时间。
+- 被禁言的玩家发送公共聊天或配置中的私聊/团队消息命令会被拦截，并弹出提示条（客户端 HUD）告知剩余时间。
+- 可选客户端提供“管理”界面：搜索玩家、查看活跃状态与历史、执行处罚、按记录撤销和分页浏览；所有操作均由服务端再次鉴权。
 - 封禁/禁言到期自动失效（服务端每秒清理）；清榜仅移除该玩家在 RankBoard
   的当前与未来统计来源（历史 NBT 快照保留）。
 

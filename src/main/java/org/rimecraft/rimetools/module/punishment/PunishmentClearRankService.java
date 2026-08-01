@@ -21,6 +21,14 @@ public final class PunishmentClearRankService {
     }
 
     public static boolean clearRank(MinecraftServer server, UUID playerId) {
+        return clearRank(server, playerId, "all");
+    }
+
+    public static boolean clearRank(MinecraftServer server, UUID playerId, String period) {
+        if (!"week".equalsIgnoreCase(period) && !"month".equalsIgnoreCase(period)
+                && !"all".equalsIgnoreCase(period)) return false;
+        // RankBoard derives both rolling periods from the vanilla stats source;
+        // clearing either period therefore invalidates that common source and refreshes its cache.
         Path statsFile = server.getWorldPath(LevelResource.PLAYER_STATS_DIR).resolve(playerId + ".json");
         try {
             Files.deleteIfExists(statsFile);

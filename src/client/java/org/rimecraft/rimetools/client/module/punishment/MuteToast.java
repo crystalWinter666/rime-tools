@@ -31,7 +31,9 @@ public final class MuteToast implements HudElement {
         int y = 24;
         RimeUi.roundedRect(graphics, x, y, WIDTH, HEIGHT, RimeUi.OVERLAY);
         RimeUi.roundedOutline(graphics, x, y, WIDTH, HEIGHT, RimeUi.DANGER);
-        Component text = Component.translatable("rime-tools.punish.muted_notice", remainingSeconds);
+        Component text = remainingSeconds < 0
+                ? Component.translatable("rime-tools.punish.muted.permanent")
+                : Component.translatable("rime-tools.punish.muted_notice", remainingSeconds);
         graphics.centeredText(minecraft.font, text, x + WIDTH / 2, y + 6, RimeUi.DANGER);
     }
 }

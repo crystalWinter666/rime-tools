@@ -5,6 +5,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
 import org.rimecraft.rimetools.module.ModuleRegistry;
 import org.rimecraft.rimetools.module.RimeModuleContext;
+import org.rimecraft.rimetools.module.chat.ChatModule;
+import org.rimecraft.rimetools.module.punishment.PunishmentModule;
 import org.rimecraft.rimetools.module.teleport.TeleportModule;
 import org.rimecraft.rimetools.module.title.TitleModule;
 import org.slf4j.Logger;
@@ -36,6 +38,8 @@ public final class RimeTools implements ModInitializer {
         RimeModuleContext context = new RimeModuleContext(configDirectory, LOGGER, moduleRegistry);
         moduleRegistry.register(new TeleportModule());
         moduleRegistry.register(new TitleModule());
+        moduleRegistry.register(new ChatModule());
+        moduleRegistry.register(new PunishmentModule());
         moduleRegistry.modules().forEach(module -> {
             try {
                 module.initialize(context);

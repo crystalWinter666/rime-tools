@@ -7,7 +7,7 @@ import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import org.rimecraft.rimetools.module.punishment.PunishmentModule;
-import org.rimecraft.rimetools.module.punishment.data.PunishmentRecord;
+import org.rimecraft.rimetools.module.punishment.PunishmentText;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,9 +26,9 @@ public abstract class PlayerListMixin {
         if (module == null) return;
         module.activeBan(nameAndId.id()).ifPresent(ban -> {
             long now = Instant.now().getEpochSecond();
-            Component message = ban.type() == PunishmentRecord.Type.PERMA_BAN
-                    ? Component.translatable("rime-tools.punish.login.banned")
-                    : Component.translatable("rime-tools.punish.login.tempbanned", ban.expiresAt() - now);
+            Component message = ban.expiresAt() == 0
+                    ? PunishmentText.banned(ban)
+                    : PunishmentText.tempBanned(ban, Math.max(0, ban.expiresAt() - now));
             callbackInfo.setReturnValue(message);
             callbackInfo.cancel();
         });
@@ -41,7 +41,7 @@ public abstract class PlayerListMixin {
         if (module == null) return;
         module.activeMute(player.getUUID()).ifPresent(mute -> {
             long remaining = Math.max(0, mute.expiresAt() - Instant.now().getEpochSecond());
-            player.sendSystemMessage(Component.translatable("rime-tools.punish.muted.online", remaining));
+            module.notifyMuted(player, mute, mute.expiresAt() == 0 ? -1 : remaining);
         });
     }
 }
