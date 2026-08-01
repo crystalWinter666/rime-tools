@@ -29,6 +29,9 @@ import org.rimecraft.rimetools.module.teleport.teleport.TeleportService;
 import org.rimecraft.rimetools.module.teleport.teleport.TeleportType;
 import org.rimecraft.rimetools.module.teleport.util.NameValidator;
 import org.rimecraft.rimetools.module.teleport.util.Permissions;
+import org.rimecraft.rimetools.module.title.TitleModule;
+import org.rimecraft.rimetools.module.title.storage.TitleRepository;
+import org.rimecraft.rimetools.module.title.title.TitleDefinition;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,7 +45,7 @@ public final class TeleportCommands {
             "descp", "descg", "tp", "tphere", "tpa", "tpahere", "accept", "deny", "cancel",
             "tpaallow", "tpadisallow", "tpaallowlist", "tpablock", "tpaunblock", "tpablocklist",
             "back", "last", "tpother", "rtp", "confirm", "cancelconfirm", "reload", "importstp",
-            "gui", "manage", "testwp"
+            "gui", "manage", "test"
     );
 
     private final TeleportModule mod;
@@ -149,7 +152,7 @@ public final class TeleportCommands {
             case "importstp" -> importStp(source, args);
             case "gui" -> openGui(source);
             case "manage" -> managePlayer(source, args);
-            case "testwp" -> testWaypoint(source, args);
+            case "test" -> test(source, args);
             default ->
                     mod.config().easyTp && args.length == 1 ? easyTeleport(source, args[0]) : message(source, "help.header");
         };
@@ -663,20 +666,35 @@ public final class TeleportCommands {
         return 1;
     }
 
-    private int testWaypoint(CommandSourceStack source, String[] args) {
+    private int test(CommandSourceStack source, String[] args) {
         ServerPlayer player = player(source);
         if (player == null) return 0;
         if (!Permissions.isAdmin(source)) return denied(source);
-        String name = args.length < 2 ? "test_wp" : args[1];
-        long now = Instant.now().getEpochSecond();
-        TeleportPosition pos = TeleportPosition.from(player);
-        Waypoint wp = new Waypoint(name, pos.world(), pos.x(), pos.y(), pos.z(),
-                pos.yaw(), pos.pitch(), "dev test waypoint", player.getUUID(), now, now);
+        if (args.length < 2 || "wp".equalsIgnoreCase(args[1])) {
+            String name = args.length < 3 ? "test_wp" : args[2];
+            long now = Instant.now().getEpochSecond();
+            TeleportPosition pos = TeleportPosition.from(player);
+            Waypoint wp = new Waypoint(name, pos.world(), pos.x(), pos.y(), pos.z(),
+                    pos.yaw(), pos.pitch(), "dev test waypoint", player.getUUID(), now, now);
 
-        mod.waypoints().setGlobal(wp);
-        message(source, "waypoint.created", "name", name);
-        sendOpenScreen(player, 0, null, null);
-        return 1;
+            mod.waypoints().setGlobal(wp);
+            message(source, "waypoint.created", "name", name);
+            sendOpenScreen(player, 0, null, null);
+            return 1;
+        }
+        if ("title".equalsIgnoreCase(args[1])) {
+            TitleRepository repository = TitleModule.repository();
+            if (repository == null) {
+                source.sendFailure(Component.literal("Title system not ready"));
+                return 0;
+            }
+            repository.put(new TitleDefinition("test_1", "测试头衔一", "#ff5555", 1, true));
+            repository.put(new TitleDefinition("test_2", "测试头衔二", "#55ff55", 2, true));
+            repository.put(new TitleDefinition("test_3", "测试头衔三", "#5555ff", 3, true));
+            source.sendSuccess(() -> Component.literal("Created test titles: test_1, test_2, test_3"), false);
+            return 1;
+        }
+        return message(source, "help.header");
     }
 
     private int managePlayer(CommandSourceStack source, String[] args) {

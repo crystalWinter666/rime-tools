@@ -4,6 +4,7 @@ import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import org.rimecraft.rimetools.carpet.fakeplayer.FakePlayerInventoryStore;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,5 +49,29 @@ public abstract class EntityPlayerMPFakeMixin {
             inventory.setItem(slot, stack);
         }
         this.rimetools$inventoryBeforeDeath = null;
+
+        // Snapshot the restored inventory so the next spawn of this fake player gets it back.
+        List<ItemStack> slots = new ArrayList<>(inventory.getContainerSize());
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            slots.add(inventory.getItem(slot));
+        }
+        FakePlayerInventoryStore.save(player.getGameProfile().name(), slots);
+    }
+
+    @Inject(method = "loadPlayerData", at = @At("RETURN"))
+    private static void rimetools$restoreStoredInventory(EntityPlayerMPFake fakePlayer, CallbackInfo callbackInfo) {
+        if (fakePlayer.isAShadow) {
+            return; // shadow copies a real player's data; never overwrite it with a fake snapshot
+        }
+        Inventory inventory = fakePlayer.getInventory();
+        List<ItemStack> target = new ArrayList<>(inventory.getContainerSize());
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            target.add(inventory.getItem(slot));
+        }
+        if (FakePlayerInventoryStore.restore(fakePlayer.getGameProfile().name(), target)) {
+            for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+                inventory.setItem(slot, target.get(slot));
+            }
+        }
     }
 }

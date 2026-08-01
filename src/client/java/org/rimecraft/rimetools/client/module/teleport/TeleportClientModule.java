@@ -19,6 +19,7 @@ import org.rimecraft.rimetools.client.module.ClientModuleContext;
 import org.rimecraft.rimetools.client.module.RimeClientModule;
 import org.rimecraft.rimetools.client.module.teleport.config.ClientConfig;
 import org.rimecraft.rimetools.client.module.teleport.screen.WaypointManagerScreen;
+import org.rimecraft.rimetools.client.module.title.TitleScreen;
 import org.rimecraft.rimetools.client.module.teleport.toast.TpaToastManager;
 import org.rimecraft.rimetools.client.ui.ClientGuiRegistry;
 import org.rimecraft.rimetools.module.teleport.TeleportModule;
@@ -134,6 +135,24 @@ public final class TeleportClientModule implements RimeClientModule {
                         toastManager.addIncoming("TestPlayer", 0, 60);
                         toastManager.addSent("AnotherPlayer", 1, 30);
                         ctx.getSource().sendFeedback(Component.literal("\u00a7a[Test] 2 toasts"));
+                        return 1;
+                    }))
+                    .then(ClientCommands.literal("gui").executes(ctx -> {
+                        var player = Minecraft.getInstance().player;
+                        if (player == null) return 0;
+                        // Seeds the test waypoint server-side (idempotent) and opens the teleport
+                        // GUI listing it, so the screen is never empty in a fresh singleplayer world.
+                        player.connection.sendCommand("rime test wp");
+                        ctx.getSource().sendFeedback(Component.literal("\u00a7a[Test] Sent rime test wp; teleport GUI should open with test_wp (admin required)"));
+                        return 1;
+                    }))
+                    .then(ClientCommands.literal("title").executes(ctx -> {
+                        var player = Minecraft.getInstance().player;
+                        if (player == null) return 0;
+                        // Seeds the three test titles server-side before the screen requests them.
+                        player.connection.sendCommand("rime test title");
+                        Minecraft.getInstance().setScreenAndShow(new TitleScreen(null));
+                        ctx.getSource().sendFeedback(Component.literal("\u00a7a[Test] Sent rime test title; opened title GUI"));
                         return 1;
                     })));
         });

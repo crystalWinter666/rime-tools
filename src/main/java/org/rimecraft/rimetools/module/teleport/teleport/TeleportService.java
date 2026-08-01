@@ -1,5 +1,8 @@
 package org.rimecraft.rimetools.module.teleport.teleport;
 
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -134,9 +137,27 @@ public final class TeleportService {
         String reasonText = messages.resolveMessage(player, "safety.reason." + reason);
         messages.send(player, "safety.confirm", MessageService.vars(
                 "reason", reasonText,
-                "confirm", messages.component(player, "safety.button.confirm"),
-                "cancel", messages.component(player, "safety.button.cancel")));
+                "confirm", confirmButton(player, "safety.button.confirm", "/tpconfirm"),
+                "cancel", confirmButton(player, "safety.button.cancel", "/tpcancelconfirm")));
         return Result.PENDING_CONFIRM;
+    }
+
+    /**
+     * Button label comes from the message config; the click command is pinned in code on every
+     * node of the label so an overridden or outdated message file can never make confirmation
+     * run the wrong command (a leaf's own click tag would otherwise shadow the pinned one).
+     */
+    private Component confirmButton(ServerPlayer player, String labelKey, String command) {
+        return pinClick(messages.component(player, labelKey), new ClickEvent.RunCommand(command));
+    }
+
+    private static MutableComponent pinClick(Component component, ClickEvent click) {
+        MutableComponent result = component.copy().withStyle(style -> style.withClickEvent(click));
+        result.getSiblings().clear();
+        for (Component sibling : component.getSiblings()) {
+            result.append(pinClick(sibling, click));
+        }
+        return result;
     }
 
     public enum Result {SUCCESS, FAILED, PENDING_CONFIRM}
